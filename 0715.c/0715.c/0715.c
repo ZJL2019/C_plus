@@ -28,7 +28,7 @@ int ___main()//回文
 	scanf("%d%d", &n, &m);
 	for (i = n; i; i /= m)
 	{
-		sum = sum * 10 + i % m;
+		sum = sum * m + i % m;
 	}
 	printf("%d在%d进制下是%d\n", n, m, sum);
 
