@@ -23,8 +23,7 @@ int main()
 	SeqListRemove(&test, 5);
 	SeqListModify(&test, 1, 9);
 	SeqListPrint(&test);
-
-	//SeqListRemoveAll(&test, 9);
+	SeqListRemoveAll(&test, 9);
 	SeqListRemoveAllN(&test, 9);
 	SeqListBubbleSort(&test);
 	SeqListPrint(&test);

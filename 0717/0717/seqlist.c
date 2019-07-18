@@ -95,21 +95,20 @@ void SeqListRemove(SeqList* psl, SLDataType x)
 	}
 	psl->size--;
 }
-void SeqListRemoveAll(SeqList* psl, SLDataType x)//bug
+void SeqListRemoveAll(SeqList* psl, SLDataType x)
 {
 	int i;
 	int gap = 0;
-	for (i = 0; i < psl->size-gap; i++)
+	for (i = 0; i < psl->size; i++)
 	{
 		if (psl->array[i + gap] == x)
 		{
 			gap++;
-			if (i + gap >= psl->capacity)
-			{
-				break;
-			}
 		}
-		psl->array[i] = psl->array[i + gap];
+		else
+		{
+			psl->array[i - gap] = psl->array[i];
+		}
 	}
 	psl->size -= gap;
 }
