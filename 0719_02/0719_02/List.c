@@ -97,3 +97,54 @@ void ListDestory(List* plist)
 	free(plist->_head);
 	plist->_head = NULL;
 }
+
+void ListDistinct(List*plist)
+{
+	ListNode*cur;
+	for (cur = plist->_head->_next; cur != plist->_head->_prev;)
+	{
+		if (cur->_data ==cur->_next->_data)
+		{
+			ListErase(cur->_next);
+		}
+		else
+		{
+			cur = cur->_next;
+		}
+	}
+}
+
+void ListMerge(List*plist1, List*plist2)
+{
+	ListNode*cur1 = plist1->_head->_next;
+	ListNode*cur2 = plist2->_head->_next;
+	ListNode*tmp1 = cur1;
+	ListNode*tmp2 = cur2;
+	while (cur1!=plist1->_head&&cur2!=plist2->_head)
+	{
+		if (cur1->_data > cur2->_data)
+		{
+			tmp1 = cur1->_prev;
+			tmp2 = cur2->_next;
+
+			cur1->_prev = cur2;
+			cur2->_next = cur1;
+			tmp1->_next = cur2;
+			cur2->_prev = tmp1;
+			cur2 = tmp2;
+		}
+		else
+		{
+			cur1 = cur1->_next;
+		}
+		if (cur1 == plist1->_head)
+		{
+			tmp2 = plist2->_head->_prev;
+			cur2->_prev = cur1->_prev;
+			cur1->_prev->_next = cur2;
+			tmp2->_next = cur1;
+			cur1->_prev = tmp2;
+		}
+	}
+	free(plist2->_head);
+}
