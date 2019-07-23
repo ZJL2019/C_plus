@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 #include"List.h"
-void searchData(List*plist, char*find, LTDataType*searchpos)
+void searchData(List*plist, char*find, Contact*searchpos)
 {
 	int count=0,flag,cap=0;
 	char age[4] = { 0 };
@@ -96,7 +96,7 @@ void ShowContact(List* plist)
 	}
 }
 
-void printsearch(LTDataType *searchpos)
+void printsearch(Contact *searchpos)
 {
 	int i;
 	for (i = 1; searchpos[i].name; i++)

@@ -8,10 +8,11 @@ typedef struct {
 	char phonenum[13];
 	char address[256];
 }Contact;
+Contact *searchpos[20];
 
 
-void searchData(List*plist, char*find, LTDataType *searchpos);
-void printsearch(LTDataType *searchpos);
+void searchData(List*plist, char*find, Contact *searchpos);
+void printsearch(Contact *searchpos);
 Contact createData();
 void ShowContact(List* plist);
 void fillData(Contact *src, char*name, char sex, char age, char pn, char addr);

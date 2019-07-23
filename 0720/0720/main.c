@@ -17,6 +17,7 @@ int main()
 	List list;
 	volatile int quit = 0;
 	int select = 0;
+	char find[20] = { 0 };
 	ListInit(&list);
 	while (!quit)
 	{
@@ -32,7 +33,7 @@ int main()
 			ListPushBack(&list, createData());
 			break;
 		case 3:
-			char find[20] = { 0 };
+			
 			scanf("%s", find);
 			searchData(&list,find,searchpos);
 			printsearch(searchpos);
