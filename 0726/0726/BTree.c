@@ -169,9 +169,14 @@ int BinaryTreeComplete(BTNode* root)
 	while (QueueIsEmpty(&qu))
 	{
 		tmp = QueueFront(&qu);
-		if (leafflag && (tmp->left || tmp->right))
+		QueuePop(&qu);
+		if (leafflag)
 		{
-			return 0;
+			if (leafflag && (tmp->left || tmp->right))
+			{
+				return 0;
+			}
+			continue;
 		}
 		if (tmp->left&&tmp->right)
 		{
@@ -191,7 +196,7 @@ int BinaryTreeComplete(BTNode* root)
 			}
 		}
 		
-		QueuePop(&qu);
+
 	}
 	return 1;
 	QueueDestory(&qu);
