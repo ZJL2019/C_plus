@@ -196,3 +196,15 @@ int BinaryTreeComplete(BTNode* root)
 	return 1;
 	QueueDestory(&qu);
 }
+void BinaryTreeDestory(BTNode* root)
+{
+	BTNode*left, *right;
+	if (root)
+	{
+		left = root->left;
+		right = root->right;
+		free(root);
+		BinaryTreeDestory(left);
+		BinaryTreeDestory(right);
+	}
+}
