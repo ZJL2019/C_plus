@@ -169,6 +169,7 @@ int BinaryTreeComplete(BTNode* root)
 	while (QueueIsEmpty(&qu))
 	{
 		tmp = QueueFront(&qu);
+		printf("%c", tmp->data);
 		QueuePop(&qu);
 		if (leafflag)
 		{
@@ -195,8 +196,6 @@ int BinaryTreeComplete(BTNode* root)
 				QueuePush(&qu, tmp->left);
 			}
 		}
-		
-
 	}
 	return 1;
 	QueueDestory(&qu);
