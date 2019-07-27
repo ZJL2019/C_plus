@@ -74,6 +74,7 @@ void BinaryTreeLevelOrder(BTNode* root)
 		}
 		QueuePop(&qu);
 	}
+	QueueDestory(&qu);
 }
 
 void BinaryTreePrevOrderNonR(BTNode* root)	
@@ -100,4 +101,98 @@ void BinaryTreePrevOrderNonR(BTNode* root)
 		}
 	}
 	StackDestory(&st);
+}
+
+void BinaryTreeInOrderNonR(BTNode* root)
+{
+	Stack st;
+	BTNode *cur = root;
+	StackInit(&st, 100);
+	while (cur || StackIsEmpty(&st))
+	{
+		for (; cur; cur = cur->left)
+		{
+			StackPush(&st, cur);
+		}
+
+		if (StackIsEmpty(&st))
+		{
+			cur = StackFront(&st);
+			putchar(cur->data);
+			StackPop(&st);
+			cur = cur->right;
+		}
+	}
+	StackDestory(&st);
+}
+
+
+void BinaryTreePostOrderNonR(BTNode* root)
+{
+	Stack st;
+	BTNode *cur = root;
+	int tag[32] = { 0 };
+	StackInit(&st, 100);
+	while (cur || StackIsEmpty(&st))
+	{
+		for (; cur; cur = cur->left)
+		{
+			StackPush(&st, cur);
+			tag[st.size] = 0;
+		}
+
+		while (StackIsEmpty(&st) && tag[st.size] == 1)
+		{
+			cur = StackFront(&st);
+			putchar(cur->data);
+			StackPop(&st);
+			cur = NULL;
+		}
+
+		if (StackIsEmpty(&st))
+		{
+			tag[st.size] = 1;
+			cur = StackFront(&st)->right;
+		}
+	}
+	StackDestory(&st);
+}
+
+int BinaryTreeComplete(BTNode* root)
+{
+	Queue qu;
+	BTNode*tmp;
+	int leafflag = 0;
+	QueueInit(&qu);
+	QueuePush(&qu, root);
+
+	while (QueueIsEmpty(&qu))
+	{
+		tmp = QueueFront(&qu);
+		if (leafflag && (tmp->left || tmp->right))
+		{
+			return 0;
+		}
+		if (tmp->left&&tmp->right)
+		{
+			QueuePush(&qu, tmp->left);
+			QueuePush(&qu, tmp->right);
+		}
+		else if (tmp->right&&!tmp->left)
+		{
+			return 0;
+		}
+		else
+		{
+			leafflag = 1;
+			if (tmp->left)
+			{
+				QueuePush(&qu, tmp->left);
+			}
+		}
+		
+		QueuePop(&qu);
+	}
+	return 1;
+	QueueDestory(&qu);
 }

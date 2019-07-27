@@ -14,7 +14,11 @@ int main()
 	printf("\n");
 	BinaryTreePrevOrderNonR(testTree);
 	printf("\n");
-
+	BinaryTreeInOrderNonR(testTree);
+	printf("\n");
+	BinaryTreePostOrderNonR(testTree);
+	printf("\n");
+	printf("%d\n", BinaryTreeComplete(testTree));
 	system("pause");
 	return 0;
 }
