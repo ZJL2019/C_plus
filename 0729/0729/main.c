@@ -10,8 +10,8 @@ int main()
 	//SelectSort(a, ARRSIZE(a));
 	//Qsort2(a, ARRSIZE(a));//ÍÚ¿Ó·¨
 	//Qsort3(a, ARRSIZE(a));
-	//insertSort(a, ARRSIZE(a));
-	ShellSort(a, ARRSIZE(a));
+	InsertSort(a, ARRSIZE(a));
+	//ShellSort(a, ARRSIZE(a));
 	printArray(a, ARRSIZE(a));
 	system("pause");
 	return 0;
