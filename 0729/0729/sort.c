@@ -178,11 +178,25 @@ int Partition(int *arr, int start, int end)
 	{
 		SwapArgs(arr + start, arr + mid);
 	}
+	if (end - start <= 2)
+	{
+		return mid;
+	}
 	SwapArgs(arr + mid, arr + end - 1);
 	int i = start + 1;
 	int j = end - 2;
+	while (arr[i] <arr[end - 1])
+	{
+		i++;
+	}
+	while (arr[j] >arr[end - 1])
+	{
+		j--;
+	}
 	while (i < j)
 	{
+		SwapArgs(arr + i, arr + j);
+		j--, i++;
 		while (arr[i] <arr[end - 1])
 		{
 			i++;
@@ -191,18 +205,14 @@ int Partition(int *arr, int start, int end)
 		{
 			j--;
 		}
-		SwapArgs(arr + i, arr + j);
-	}
-	if (end - start <= 2)
-	{
-		return mid;
 	}
 	SwapArgs(arr + i, arr + end - 1);
 	return i;
 }
+
 void dealQsort3(int *arr, int start, int end)
 {
-	if (end - start>INSERT_SORT_LENTH)
+	if (end - start > INSERT_SORT_LENTH)
 	{
 		int pivot = Partition(arr, start, end);
 		dealQsort3(arr, start, pivot - 1);
@@ -213,6 +223,7 @@ void dealQsort3(int *arr, int start, int end)
 		InsertSort(arr + start, end - start + 1);
 	}
 }
+
 void Qsort3(int *arr, int n)//hoare
 {
 	dealQsort3(arr, 0, n - 1);
@@ -242,15 +253,46 @@ void ShellSort(int *arr, int n)
 	{
 		for (k = 0; k<gap; k++)
 		{
-			for (i = k+gap; i < n; i += gap)
+			for (i = k + gap; i < n; i += gap)
 			{
 				tmp = arr[i];
-				for (j = i; j>0 && arr[j - gap] > tmp; j-=gap)
+				for (j = i; j>0 && arr[j - gap] > tmp; j -= gap)
 				{
 					arr[j] = arr[j - gap];
 				}
 				arr[j] = tmp;
 			}
+		}
+	}
+}
+
+void QSortNR(int *arr, int n)
+{
+	QuickSortNonR(arr, 0, n - 1);
+}
+
+void QuickSortNonR(int* arr, int left, int right)
+{
+	Stack st;
+	StackInit(&st, 100);
+	StackPush(&st, left);
+	StackPush(&st, right);
+	while (StackIsEmpty(&st))
+	{
+		int end = StackFront(&st);
+		StackPop(&st);
+		int begin = StackFront(&st);
+		StackPop(&st);
+		int div = Partition(arr, begin, end);
+		if (begin < div - 1)
+		{
+			StackPush(&st, begin);
+			StackPush(&st, div - 1);
+		}
+		if (div + 1 < end)
+		{
+			StackPush(&st, div + 1);
+			StackPush(&st, end);
 		}
 	}
 }

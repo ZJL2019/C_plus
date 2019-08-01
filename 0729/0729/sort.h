@@ -1,6 +1,7 @@
 #ifndef _SORT_H_
 #define _SORT_H_
-#define INSERT_SORT_LENTH 8
+#define INSERT_SORT_LENTH 5
+#include"stack.h"
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -20,6 +21,8 @@ void dealQsort3(int *arr, int start, int end);
 void Qsort3(int *arr, int n);//hoare
 void InsertSort(int *arr, int n);
 void ShellSort(int *arr, int n);
+void QuickSortNonR(int* arr, int left, int right);
+void QSortNR(int *arr, int n);
 
 
 #endif /*_SORT_H_*/
