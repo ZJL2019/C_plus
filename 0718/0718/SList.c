@@ -97,7 +97,7 @@ void SListRemoveAll(SListNode** pphead, SLTDataType x)
 		return;
 	}
 	SListNode *tmp;
-	while(*pphead&&(*pphead)->data==x)
+	while (*pphead && (*pphead)->data == x)
 	{
 		SListPopFront(pphead);
 	}
@@ -115,9 +115,9 @@ void SListRemoveAll(SListNode** pphead, SLTDataType x)
 }
 void SListReverse(SListNode** pphead)
 {
-	SListNode *head=*pphead;//此指针在每次循环中始终指向当前链表的头
-	SListNode *tmp=head->next;//此指针在每次循环中始终指向要被后删头插的节点
-	SListNode *oldh =*pphead;//此指针在每次循环中始终指向原本的头结点，不会改变指向
+	SListNode *head = *pphead;//此指针在每次循环中始终指向当前链表的头
+	SListNode *tmp = head->next;//此指针在每次循环中始终指向要被后删头插的节点
+	SListNode *oldh = *pphead;//此指针在每次循环中始终指向原本的头结点，不会改变指向
 
 	while (tmp)//如果tmp为空，则代表逆序结束，旧头的next已经是空的了，成为新链表的末尾
 	{
@@ -154,4 +154,28 @@ void SListPrint(SListNode* phead)
 		printf("%d->", tmp->data);
 	}
 	printf("NULL\n");
+}
+
+
+SListNode * SListFindk(SListNode* phead, SLTDataType x)
+{
+	int n = 0;
+	SListNode* tmp;
+	
+	for (tmp = phead; tmp; tmp = tmp->next)
+	{
+		n++;
+	}
+	printf("%d\n", n);
+	int j=0;
+	for (tmp = phead; tmp; tmp = tmp->next, j++)
+	{
+		if (j == n - x)
+		{
+			/*printf("%d\n", tmp->data);
+			break;*/
+			return tmp;
+			break;
+		}
+	}
 }

@@ -28,4 +28,6 @@ void SListEraseAfter(SListNode* pos);
 void SListReverse(SListNode** pphead);
 void SListReverse2(SListNode** pphead);
 void SListPrint(SListNode* phead);
+SListNode *SListFindk(SListNode* phead, SLTDataType x);
+
 #endif /*_SLIST_C_*/

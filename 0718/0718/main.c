@@ -15,10 +15,11 @@ int main()
 	SListPushFront(&head, 4);
 	SListPushFront(&head, 3);
 	SListPushFront(&head, 2);
-	SListRemoveAll(&head, 1);
+	printf("%d\n", SListFindk(head, 1)->data);
+	//SListRemoveAll(&head, 1);
 	//SListReverse(&head);
 	//SListReverse2(&head);
-	SListInsertAfter(SListFind(head,2), 1);
+	//SListInsertAfter(SListFind(head,2), 1);
 	/*SListEraseAfter(SListFind(head, 5));*/
 	/*SListPopFront(&head);
 	SListPopFront(&head);*/
