@@ -1,11 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 #include<stdio.h>
 #include<string.h>
-char* myString()
+char* myString(char buffer[],int n)
 {
-	char buffer[6] = { 0 };
 	char *s = "Hello world!" ;
-	for (int i = 0; i < sizeof(buffer)-1; i++)
+	for (int i = 0; i <n-1; i++)
 	{
 		buffer[i] = *(s + i);
 	}
@@ -35,8 +34,11 @@ int main()
 	for (int i = 0; i < sizeof(buffer)-1; i++)
 	{
 		buffer[i] = *(s + i);
-	}
-	printf("%s", myString());*/
+	}*/
+	char buffer[6] = { 0 };
+	int n = sizeof(buffer);
+	char*a = myString(buffer,n);
+	printf("%s",a );
 	
 //***********************************************
 	//int i = 1;
@@ -52,7 +54,7 @@ int main()
 	}
 	printf("%d", strlen(a));*/
 //***********************************************
-	char arr[] = { "abaccdeff" };
+	/*char arr[] = { "abaccdeff" };
 	char arr1[127] = { 0 };
 	int i = 0;
 	for (i = 0; i < sizeof(arr); i++)
@@ -66,6 +68,6 @@ int main()
 			printf("%c", i);
 			break;
 		}
-	}
+	}*/
 	return 0;
 }
