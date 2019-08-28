@@ -19,22 +19,30 @@ void GlobalInin(unsigned  long ulArg)
 	return;
 }
 
-SListNode* SearchlistNode(*phead)
+//SListNode* SearchlistNode(*phead)
+//{
+//	SListNode*tmp;
+//	int n=0;
+//	for (tmp = phead; tmp; tmp = tmp->next)
+//	{
+//		n++;
+//	}
+//	int j = 1;
+//	for (tmp = phead; tmp; tmp = tmp->next,j++)
+//	{
+//		if (j == n - k + 1)
+//		{
+//			return tmp;
+//		}
+//	}
+//}
+
+int Change(int *px)
 {
-	SListNode*tmp;
-	int n=0;
-	for (tmp = phead; tmp; tmp = tmp->next)
-	{
-		n++;
-	}
-	int j = 1;
-	for (tmp = phead; tmp; tmp = tmp->next,j++)
-	{
-		if (j == n - k + 1)
-		{
-			return tmp;
-		}
-	}
+	int y = 8;
+	y = y - *px;
+	px = &y;
+	return 0;
 }
 
 int main()
@@ -47,7 +55,12 @@ int main()
 	//t = CIR(a + b);//a+b*a+b
 	//printf("%d\n", t);
 //**************************************************
-	GlobalInin(g_ulGlobal);
-	printf("%lu", g_ulGlobal);
+	/*GlobalInin(g_ulGlobal);
+	printf("%lu", g_ulGlobal);*/
+//**************************************************
+	int xx = 3;
+	int *pY = &xx;
+	Change(pY);
+	printf("%d", *pY);
 	return 0;
 }
