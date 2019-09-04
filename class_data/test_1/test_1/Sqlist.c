@@ -60,24 +60,27 @@ void ListDelete(SeqList *psl, SLDataType i)
 	psl->length--;
 }
 
-SeqList* RemoveList(SeqList *psl, SeqList *psl2)
+void MergeList(SeqList *psl, SeqList *psl2)
 {
-	int i, j,k;
-	SeqList *tmp;
-	for (i = 0,j=0,k=0; i < psl->length;k++ )
+	int i,j,tmp;
+	i = psl->length;
+	psl->length += psl2->length;
+	for (i,j=0; i < psl->length; i++,j++)
 	{
-		if (psl->array[i]>psl2->array[j])
+		psl->array[i] = psl2->array[j];
+	}
+	for (i = 0; i < psl->length - 1; i++)
+	{
+		for (j = 0; j < psl->length - 1 - i; j++)
 		{
-			tmp->array[k] = psl->array[i];
-			i++;
-		}
-		else if (psl->array[i] < psl2->array[j])
-		{
-			tmp->array[k] = psl2->array[j];
-			j++;
+			if (psl->array[j] < psl->array[j + 1])
+			{
+				tmp = psl->array[j];
+				psl->array[j] = psl->array[j + 1];
+				psl->array[j + 1] = tmp;
+			}
 		}
 	}
-	return tmp;
 }
 
 void ShowList(SeqList *psl)

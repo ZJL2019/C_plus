@@ -22,5 +22,5 @@ SLDataType GetELem(SeqList psl, SLDataType i);
 SLDataType LocateElem(SeqList psl, SLDataType e);
 void ListInsert(SeqList *psl, SLDataType i, SLDataType e);
 void ListDelete(SeqList *psl, SLDataType i);
-void RemoveList(SeqList *psl, SeqList *psl2);
+void MergeList(SeqList *psl, SeqList *psl2);
 #endif /*_SQLIST_C_*/
