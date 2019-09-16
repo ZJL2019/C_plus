@@ -375,6 +375,7 @@ int main()
 #endif
 
 
+#if 0
 class Date
 {
 public:
@@ -410,6 +411,25 @@ public:
 		return false;
 	}
 
+	bool operator==(const Date& d)
+	{
+		return _year == d._year&&_month == d._month&&_day == d._day;
+	}
+
+	bool operator!=(const Date& d)
+	{
+		return!(*this == d);
+	}
+
+	bool IsGreater(const Date& d)
+	{
+		if (_year > d._year || _year == d._year&&_month > d._month || _year == d._year&&_month == d._month&&_day > d._day)
+		{
+			return true;
+		}
+
+		return false;
+	}
 
 private:
 	int _year;
@@ -430,6 +450,8 @@ int main()
 	Date d2(2019, 9, 15);
 	Date d3(2020, 9, 14);
 
+	d3 = d1;
+
 	if (d1 > d2)
 	{
 		d1.PrintDate();
@@ -439,4 +461,152 @@ int main()
 		d2.PrintDate();
 	}
 	return 0;
+}
+#endif
+
+
+#if 0
+//赋值运算符重载：如果用户没有显式提供，编译器将会生成一份默认的赋值运算符重载
+//如果一个类中涉及到资源管理，用户必须提供赋值运算符重载
+//因为：如果不提供赋值运算符重载，编译器自己生成的默认赋值运算符重载，功能上相当于编译器自己生成的默认拷贝构造函数
+class String
+{
+public:
+	String(const char* str = "")
+	{
+		if (nullptr == str)
+		{
+			str = "";
+		}
+		_str = (char*)malloc(strlen(str) + 1);
+		strcpy(_str, str);
+	}
+	
+	~String()
+	{
+		if (_str)
+		{
+			free(_str);
+		}
+	}
+
+private:
+	char* _str;
+};
+
+void TestString()
+{
+	String s1("hello");
+	String s2("world");
+
+	s1 = s2;
+}
+
+int main()
+{
+	TestString();
+	return 0;
+}
+#endif
+
+class Date
+{
+public:
+	Date(int year = 1900, int month = 1, int day = 1)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+	}
+
+	Date(const Date& d)
+	{
+		_year = d._year;
+		_month = d._month;
+		_day = d._day;
+	}
+
+	//s3=s2=s1;
+	//需要重载赋值运算符
+	Date& operator=(const Date& d)
+	{
+		if (this != &d)
+		{
+			_year = d._year;
+			_month = d._month;
+			_day = d._day;
+		}
+		return *this;
+	}
+
+	//前置++
+	//未加限制
+	Date& operator++()
+	{
+		_day += 1;
+		return *this;
+	}
+	//后置++
+
+	Date operator++(int)
+	{
+		Date temp(*this);
+		_day += 1;
+
+		return temp;
+	}
+
+	Date& operator--()
+	{
+		_day -= 1;
+		return *this;
+	}
+
+	Date operator--(int)
+	{
+		Date temp(*this);
+		_day -= 1;
+
+		return temp;
+	}
+
+	bool operator>=(const Date& d);
+	bool operator<(const Date& d);
+	bool operator<=(const Date& d);
+private:
+	int _year;
+	int _month;
+	int _day;
+};
+
+int main()
+{
+	int a = 1;
+	int b = 2;
+	int c = 3;
+	a = b = c;
+
+
+	Date d1(2019, 9, 14);
+	Date d2(2019, 9, 15);
+	Date d3(2019, 9, 13);
+
+	d2 = ++d3;//给d3加1之后的结果给d2进行赋值
+	d2.operator=(d3.operator++());
+	
+	d2 = d3++;//加之前的旧值给d2赋值
+	d2.operator=(d3.operator++(0));
+	//赋值运算符重载后，调用本质是调用当前对象中的operator=函数
+	d2 = d1;
+	d2.operator=(d1);//operator(&d2,&d1)
+
+
+	//连续赋值时，是先将d1赋值给d2，再将d2赋值给d3
+	d3 = d2 = d1;
+	d3.operator=(d2.operator=(d1));
+
+	//创建引用变量引用自身，进行自己给自己赋值，是不允许的
+	Date& d4 = d3;
+	
+	d4 = d3;
 }
