@@ -509,6 +509,8 @@ int main()
 }
 #endif
 
+
+#if 0
 class Date
 {
 public:
@@ -609,4 +611,176 @@ int main()
 	Date& d4 = d3;
 	
 	d4 = d3;
+	return 0;
 }
+#endif
+
+#if 0
+class Date
+{
+public:
+	Date(int year = 1900, int month = 1, int day = 1)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+		cout << "Date(int,int,int):" << this << endl;
+	}
+
+	Date* operator&()//取地址符重载
+	{
+		_day++;
+		return this;
+	}
+private:
+	int _year;
+	int _month;
+	int _day;
+};
+
+int main()
+{
+	Date d1(2019, 9, 14);
+	cout << &d1 << endl;
+
+	const Date d2(2019, 9, 15);
+	cout << &d2 << endl;
+	return 0;
+}
+#endif
+
+
+#if 0
+//被const修饰的成员函数，称作为const类型的成员函数
+
+class Date
+{
+public:
+	Date(int year = 1900, int month = 1, int day = 1)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+		cout << "Date(int,int,int):" << this << endl;
+	}
+
+	Date* operator&()
+	{
+		_day++;
+		return this;
+	}
+
+	//在const成员函数中，不能修改类的任何成员变量
+	//只能修改被mutable修饰的变量
+	//const修饰的是this指针
+	void PrintDate()const
+	{
+		_day++;
+
+		cout << _year << "-" << _month << "-" << _day << endl;
+	}
+
+private:
+	int _year;
+	int _month;
+	mutable int _day;
+};
+#endif
+
+
+#if 0
+class Date
+{
+public:
+	Date(int year = 1900, int month = 1, int day = 1)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+		cout << "Date(int,int,int):" << this << endl;
+	}
+
+
+	// 	void PrintDate()
+	// 	{
+	// 		_day++;
+	// 		cout << _year << "-" << _month << "-" << _day << endl;
+	// 	}
+
+	void PrintDate()/*const*/
+	{
+		cout << _year << "-" << _month << "-" << _day << endl;
+	}
+
+private:
+	int _year;
+	int _month;
+	mutable int _day;
+};
+
+int main()
+{
+	//const类型的对象不能调用普通类型的成员函数
+	//原因：const类型对象中的成员不允许被修改
+	//		在普通类型成员函数中可以修改成员变量
+	//如果编译器允许const类型对象调用普通类型成员，在普通类型成员中可能会修改const类型对象中的内容
+	//操作不安全
+
+	const Date d1(2019, 9, 14);
+	//d1.PrintDate();
+
+	//普通类型的对象既可以调用普通类型的成员函数，也可以调用const类型的成员函数
+	//普通类型对象可读可写
+	Date d2(2019, 9, 15);
+	d2.PrintDate();
+	return;
+}
+
+#endif
+
+#if 0
+class Date
+{
+public:
+	Date(int year = 1900, int month = 1, int day = 1)
+	{
+		_year = year;
+		_month = month;
+		_day = day;
+		cout << "Date(int,int,int):" << this << endl;
+	}
+
+	// const类型的成员函数是只读的函数，不能修改对象中的任何成员变量
+	// 除非该成员变量被mutable
+	// const Date* const
+	void TestFunc1()const
+	{
+		//TestFunc2(/*this*/);
+	}
+
+	// 普通类型的成员函数是可读写的函数
+	// 可能会在该成员函数中修改成员变量
+	// Date* const 
+	void TestFunc2()
+	{}
+	const Date* operator&()const//const修饰的是this指针
+	{
+		return this;
+	}
+
+private:
+	int _year;
+	int _month;
+	int _day;
+};
+
+int main()
+{
+	Date d1(2019, 9, 14);
+	const Date d2(2019, 9, 15);
+
+	cout << &d1 << endl;
+	cout << &d2 << endl;
+	return 0;
+}
+#endif
