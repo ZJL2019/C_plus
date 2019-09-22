@@ -358,3 +358,201 @@ int main()
 	return 0;
 }
 #endif
+
+#if 0
+class Date
+{
+public:
+	Date(int year,int month,int day)
+		: _year(year)
+		, _month(month)
+		, _day(day)
+	{
+		_count++;
+	}
+
+	Date(Date& d)
+		: _year(d._year)
+		, _month(d._month)
+		, _day(d._day)
+	{
+		_count++;
+	}
+
+	~Date()
+	{
+		_count--;
+	}
+
+	static int GetCount()
+	{
+		return _count;
+	}
+
+private:
+	int _year;
+	int _month;
+	int _day;
+	static int _count;
+};
+
+int Date::_count = 0;
+
+int main()
+{
+	int sum = 0;
+	Date d1(2019, 9, 16);
+	sum += Date::GetCount();
+
+	Date d2(d1);
+	sum += Date::GetCount();
+
+	Date d3(d1);
+	sum += Date::GetCount();
+
+	return 0;
+}
+#endif
+
+
+#if 0
+//友元函数，不会将函数置于类中，而是给予一种可以调用类中成员变量的权限
+class Time
+{
+	friend class Date;
+public:
+	Time(int hour = 0, int minute = 0, int second = 0)
+		: _hour(hour)
+		, _minute(minute)
+		, _second(second)
+	{}
+
+private:
+	int _hour;
+	int _minute;
+	int _second;
+	
+	friend void Print();
+};
+
+
+class Date
+{
+private:
+	friend ostream& operator <<(ostream& _cout, const Date& d);
+public:
+	Date(int year, int month, int day)
+		: _year(year)
+		, _month(month)
+		, _day(day)
+	{}
+
+	void PrintDate()const
+	{
+		cout << _year << "-" << _month << "-" << _day << endl;
+	}
+	// 将<<运算符如果重载成类的成员函数，其第一个参数为this
+	// 因此调用方式与常规的打印方式反的
+	/*void operator<<(ostream& _cout)
+	{
+		_cout << _year << "-" << _month << "-" << _day;
+	}*/
+
+	void TestFunc()
+	{
+		_t._hour = 1;
+		_t._minute = 1;
+		_t._second = 1;
+	}
+private:
+	int _year;
+	int _month;
+	int _day;
+	Time _t;
+	friend void Print();
+};
+
+//说明：必须重载成为全局函数
+//		第一个参数必须是ostream&，第二个参数为要输出的内容(自定义类型的对象const)
+//		必须要有返回值-----连续输出
+//		尽量不要在该函数中做一些格式操作----比如换行
+//		将输出运算符重载设置成类的友元函数
+
+ostream& operator <<(ostream& _cout, const Date& d)
+{
+	_cout << d._year << "-" << d._month << "-" << d._day;
+	return _cout;
+}
+
+void Print()
+{
+	Date d(2019, 9, 18);
+	cout << d._year<< endl;
+
+
+	Time t;
+	cout << t._hour << endl;
+
+
+}
+
+int main()
+{
+	Date d(2019, 9, 18);
+	//void operator<<(const Date this*,ostream &count)
+	//正常重载<<,将其设为类内函数，在其参数列表第一个参数是this指针
+	//导致重载后，<<指向相反
+	/*d.operator<<(cout);
+	d << cout;*/
+
+	cout << d << endl;
+	return 0;
+}
+
+#endif
+
+#if 0
+class A
+{
+public:
+	A(int a)
+		:_a(a)
+	{}
+
+	class B
+	{
+	public:
+		B(int b)
+			: _b(b)
+		{}
+
+		void TestFunc()
+		{
+			A a(1);
+			a._a = 10;
+			A::_c = 10;
+		}
+
+	private:
+		int _b;
+	};
+
+private:
+	int _a;
+	static int _c;
+};
+
+int A::_c = 0;
+
+
+int main()
+{
+	A::B b(10);
+	//注意：内部类是一个独立的类，没有包含在外部类中
+	//只有在创建对应的对象时，需要加上作用域限定符
+	cout << sizeof(A) << endl;
+	return 0;
+}
+#endif
+
+
