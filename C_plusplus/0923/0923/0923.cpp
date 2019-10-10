@@ -1,9 +1,11 @@
-﻿#include<iostream>
+﻿
+#include<iostream>
 using namespace std;
 
+
+
+#if 0
 #include<string>
-
-
 //(constructor)
 void TestString1()
 {
@@ -283,4 +285,166 @@ int main()
 	ReverseString(s);
 	cout << s << endl;
 	return 0;
+}
+#endif
+
+
+#if 0
+//借助string来解决浅拷贝问题
+//string类动态管理字符串
+namespace bite
+{
+	//反例
+	class string
+	{
+	public:
+		string(char* str = "")
+		{
+			if (nullptr == str)
+				str = "";
+			
+			//申请空间
+			_str = new char[strlen(str) + 1];
+
+			//存放str中的字符串
+			strcpy(_str, str);
+		}
+
+		//浅拷贝：
+		//将s对象中内容原封不动的拷贝到新对象中
+		//值的拷贝---比特位的拷贝
+		string(const string& s)
+			:_str(s._str)
+		{}
+		//编译器生成的默认拷贝构造函数---浅拷贝&资源泄漏
+
+		//赋值运算符重载也是浅拷贝，只拷贝值，针对于开辟的空间不会拷贝
+		string& operator=(const string& s)
+		{
+			_str = s._str;
+			return *this;
+		}
+
+		//因为类中牵扯拷贝的操作都是浅拷贝，所以在调用析构函数时会对同一片空间释放多次
+		~string()
+		{
+			if (_str)
+			{
+				delete[] _str;
+				_str = nullptr;
+			}
+		}
+
+	private:
+		char* _str;
+	};
+}
+
+void TestString()
+{
+	//浅拷贝：
+	//所有对象只是简单的拷贝值，故而使用同一块内存空间
+	bite::string s1("hello");
+	bite::string s2(nullptr);
+	bite::string s3(s1);
+	s2 = s1;
+	//在调用析构函数时，会对同一块空间释放多次
+}
+
+int main()
+{
+	TestString();
+	return 0;
+}
+#endif
+
+
+#if 0
+namespace bite
+{
+	//深拷贝---传统版
+	class string
+	{
+	public:
+		string(char* str = "")
+		{
+			if (nullptr == str)
+				str = "";
+			_str = new char[strlen(str) + 1];
+			strcpy(_str, str);
+		}
+		
+		//自定义拷贝构造函数，并且在每次调用时，都给其分配一块新的空间
+		//从而解决了拷贝构造函数使用同一块空间----(深拷贝)
+		string(const string& s)
+			: _str(new char[strlen(s._str)+1])
+		{
+			strcpy(_str, s._str);
+		}
+
+
+		//创建临时指针指向新创建的空间，并进行拷贝赋值，释放其本身的空间
+		//使原本的指针指向新创建的空间
+		//使每一个对象在调用赋值时，都有一个属于自己的空间---(深拷贝)
+		string& operator=(const string& s)
+		{
+			if (this != &s)
+			{
+				char* temp = new char[strlen(s._str) + 1];
+				strcpy(temp, s._str);
+				delete[] _str;
+				_str = temp;
+			}
+			return *this;
+		}
+
+		~string()
+		{
+			if (_str)
+			{
+				delete[] _str;
+				_str = nullptr;
+			}
+		}
+	private:
+		char* _str;
+	};
+}
+
+void TestString()
+{
+	bite::string s1("hello");
+	bite::string s2(nullptr);
+	bite::string s3(s1);  
+	s2 = s1;
+}
+int main()
+{
+	TestString();
+	return 0;
+}
+#endif
+
+namespace bite
+{
+	//深拷贝---简介版
+	class string
+	{
+	public:
+		string(char* str = "")
+		{
+			if (nullptr == str)
+				str = "";
+			_str = new char[strlen(str) + 1];
+			strcpy(_str, str);
+		}
+
+		string(const string& s)
+			:_str(nullptr)
+		{
+			string str
+		}
+	private:
+		char* _str;
+	};
 }
