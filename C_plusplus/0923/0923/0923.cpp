@@ -425,6 +425,9 @@ int main()
 }
 #endif
 
+
+
+#if 0
 namespace bite
 {
 	//深拷贝---简介版
@@ -439,12 +442,54 @@ namespace bite
 			strcpy(_str, str);
 		}
 
+
+		//vs2013: _str指针的默认值是nullptr
+		//其他编译器: _str指针的默认值可能是随机值
+
+		//自定义拷贝构造函数，给_str初始化为空。创建临时string 对象strTemp
+		//并将被拷贝对象的_str值，通过调用构造函数赋值给strTemp中的_str。
+		//然后再与当前对象的_str交换
+		//通过临时对象整体调用构造函数从而，多次开辟空间，解决浅拷贝问题
 		string(const string& s)
 			:_str(nullptr)
 		{
-			string str
+			string strTemp(s._str);
+			swap(_str, strTemp._str);
+		}
+		
+		//自定义赋值运算符重载，在传参过程中，直接传值，从而产生临时变量形参
+		//然后直接与当前对象的_str交换，相当于通过形参直接开辟了空间，解决了浅拷贝问题
+		//而形参拷贝其实本质调用了拷贝构造函数，所以可以直接交换，函数周期结束后，形参释放，不影响程序
+		string& operator=(string s)
+		{
+			swap(_str, s._str);
+			return *this;
+		}
+
+		~string()
+		{
+			if (_str)
+			{
+				delete[] _str;
+				_str = nullptr;
+			}
 		}
 	private:
 		char* _str;
 	};
 }
+
+void TestString()
+{
+	bite::string s1("hello");
+	bite::string s2(s1);
+	bite::string s3;
+	s3 = s1;
+}
+
+int main()
+{
+	TestString();
+	return 0;
+}
+#endif
