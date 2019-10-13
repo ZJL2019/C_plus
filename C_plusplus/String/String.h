@@ -27,7 +27,7 @@ public:
 
 	//modify
 	void push_back(char ch);
-	String& operator+=(char c);
+	String& operator+=(char ch);
 	String& operator+=(const char* str);
 	String& operator+=(const String& s);
 	bool operator==(const String& s);
@@ -43,7 +43,7 @@ public:
 
 	//ÌØÊâ²Ù×÷
 	size_t find(char ch, size_t pos);
-	size_t rfind(char ch, size_t pos);
+	size_t rfind(char ch, size_t npos);
 	String substr(size_t pos, size_t n);
 	const char* c_str()const;
 
@@ -56,6 +56,6 @@ private:
 	size_t _capacity;
 	static size_t npos;
 };
-size_t String::npos = -1;
+
 
 //_STRING_H_
