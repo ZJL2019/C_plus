@@ -1,5 +1,6 @@
 #pragma once
 #include<iostream>
+#include<assert.h>
 using namespace std;
 class String
 {
@@ -10,7 +11,7 @@ public:
 	String(size_t n, char ch);
 	String(char* begin, char* end);
 	String(const String& s);
-	String& operator=(const String& s);
+	String& operator=(String s);
 	~String();
 
 	//capacity
@@ -52,7 +53,7 @@ public:
 private:
 	char* _str;
 	size_t _size;
-	size_t capacity;
+	size_t _capacity;
 	static size_t npos;
 };
 size_t String::npos = -1;
