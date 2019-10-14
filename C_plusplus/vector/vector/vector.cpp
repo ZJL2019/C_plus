@@ -28,7 +28,7 @@ namespace bite
 			_finish = _start + n;
 			_endofstorage = _finish;
 		}
-		
+
 		template<class Iterator>
 		vector(Iterator first, Iterator last)
 		{
@@ -49,10 +49,9 @@ namespace bite
 		}
 
 		vector(const vector<T>& v)
-			:_start(nullptr)
 		{
-			vector temp(v._start);
-			swap(_start, temp._start);
+			_start = new T[v.size()];
+			memcpy(_start, v._start, v.size()*sizeof(T));
 			_finish = _start+v.size();
 			_endofstorage = _start + v.size();
 		}
@@ -93,7 +92,7 @@ namespace bite
 		{
 			return _endofstorage - _start;
 		}
-		
+
 		bool empty()const
 		{
 			return _start == _finish;
@@ -119,10 +118,11 @@ namespace bite
 			}
 			_finish = _start + newsize;
 		}
+
 		void reserve(size_t newCapacity)
 		{
 			size_t oldCapacity = capacity();
-			if (newCapacity>oldCapacity)
+			if (newCapacity > oldCapacity)
 			{
 				//1、申请新空间
 				T* temp = new T[newCapacity];
@@ -136,13 +136,13 @@ namespace bite
 					{
 						temp[i] = _start[i];
 					}
+					//3、释放旧空间
+					delete[] _start;
 				}
-				//3、释放旧空间
-				delete[] _start;
+				_start = temp;
+				_finish = _start + n;
+				_endofstorage = _start + newCapacity;
 			}
-			_start = temp;
-			_finish = _start + n;
-			_endofstorage = _start + newCapacity;
 		}
 
 		//访问
@@ -188,11 +188,11 @@ namespace bite
 			*_finish++ = data;
 		}
 
-		void pop_push()
+		void pop_back()
 		{
 			_finish--;
 		}
-		
+
 		//返回值含义：返回新插入元素的位置
 
 		iterator insert(iterator pos, const T& data)
@@ -236,4 +236,105 @@ namespace bite
 		T* _finish;
 		T* _endofstorage;
 	};
+}
+
+void TestVector1()
+{
+	bite::vector<int> v1;
+	bite::vector<int> v2(10, 5);
+
+	int array[] = { 1, 2, 3, 4, 5 };
+	bite::vector<int> v3(array, array + sizeof(array) / sizeof(array[0]));
+	bite::vector<int>v4(v3);
+	cout << v2.size() << endl;
+	cout << v2.capacity() << endl;
+	cout << v3.front() << endl;
+	cout << v3.back() << endl;
+
+	for (size_t i = 0; i < v3.size(); i++)
+	{
+		cout << v3[i] << " ";
+	}
+	cout << endl;
+
+	//C++98
+	//bite::vector<int>::iterator it = v3.begin();
+	auto it = v3.begin();
+	while (it != v3.end())
+	{
+		cout << *it << " ";
+		it++;
+	}
+	cout << endl;
+
+	for (auto e : v4)
+	{
+		cout << e << " ";
+	}
+	cout << endl;
+}
+void TestVector2()
+{
+	bite::vector<int>v;
+	v.push_back(1);
+	v.push_back(2);
+	v.push_back(3);
+	v.push_back(4);
+	for (auto e : v)
+	{
+		cout << e << " ";
+	}
+	cout << endl;
+	cout << v.size() << endl;
+	cout << v.capacity() << endl;
+	cout << v.back() << endl;
+
+	v.pop_back();
+	cout << v.back() << endl;
+	cout << v.size() << endl;
+	for (auto e : v)
+	{
+		cout << e << " ";
+	}
+	cout << endl;
+
+	cout << v.front() << endl;
+	v.insert(v.begin(), 0);
+	cout << v.front() << endl;
+	cout << v.size() << endl;
+	for (auto e : v)
+	{
+		cout << e << " ";
+	}
+	cout << endl;
+
+}
+
+#include <vector>
+
+void TestVector3()
+{
+	vector<int> vv;
+	bite::vector<int> v(10, 5);
+	cout << v.size() << endl;
+	cout << v.capacity() << endl;
+
+	v.resize(5);
+	cout << v.size() << endl;
+	cout << v.capacity() << endl;
+
+	v.resize(8);
+	cout << v.size() << endl;
+	cout << v.capacity() << endl;
+
+	v.resize(20, 5);
+	cout << v.size() << endl;
+	cout << v.capacity() << endl;
+}
+int main()
+{
+	//TestVector1();
+	//TestVector2();
+	TestVector3();
+	return 0;
 }
