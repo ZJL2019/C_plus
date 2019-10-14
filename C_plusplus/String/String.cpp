@@ -20,8 +20,8 @@ String::String(size_t n, char ch)
 		, _capacity(n)
 		, _str(new char[_size+1])
 {
-	memset(_str, ch, _size);
-	_str[_size] = '\0';
+	memset(_str, ch, n);
+	_str[n] = '\0';
 }
 
 
@@ -141,12 +141,20 @@ String& String::operator+=(char ch)
 
 String& String::operator+=(const char* str)
 {
+	if (_size == _capacity)
+	{
+		reserve(_size + strlen(str) + 1);
+	}
 	strcpy(_str + _size, str);
 	return *this;
 }
 
 String& String::operator+=(const String& s)
 {
+	if (_size == _capacity)
+	{
+		reserve(_size+strlen(s._str)+1);
+	}
 	strcpy(_str + _size, s._str);
 	return *this;
 }
@@ -285,6 +293,58 @@ String::iterator String::end()
 	return _str + _size;
 }
 
-
 size_t String::npos = -1;
 
+//≤‚ ‘
+void TestString1()
+{
+
+	String s1;
+	String s2("hello");
+	String s3(s2);
+	String s4(10, '$');
+	String s5(s2.begin(), s2.end());
+	
+	auto it = s4.begin();
+	while (it != s4.end())
+	{
+		cout << *it;
+		it++;
+	}
+	cout << endl;
+}
+
+void TestString2()
+{
+	String s("hello");
+	cout << s.size() << endl;
+	cout << s.capacity() << endl;
+
+	s.push_back('!');
+	cout << s.size() << endl;
+	cout << s.capacity() << endl;
+
+	s.resize(15, '$');
+	cout << s.size() << endl;
+	cout << s.capacity() << endl;
+
+	s.resize(10, '&');
+	cout << s.size() << endl;
+	cout << s.capacity() << endl;
+}
+
+void TestString3()
+{
+	String s("hello");
+
+	size_t pos1 = s.find('l');
+	cout << pos1 << endl;
+
+	size_t pos2 = s.rfind('l');
+	cout << pos2 << endl;
+
+	cout << s.substr(pos1, 2) << endl;
+	String s2("world!");
+	s += s2;
+	cout << s << endl;
+}

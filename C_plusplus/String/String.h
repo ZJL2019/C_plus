@@ -51,11 +51,13 @@ public:
 	iterator begin();
 	iterator end();
 private:
-	char* _str;
 	size_t _size;
 	size_t _capacity;
+	char* _str;
 	static size_t npos;
 };
 
-
+void TestString1();
+void TestString2();
+void TestString3();
 //_STRING_H_
