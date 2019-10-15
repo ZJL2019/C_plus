@@ -2,7 +2,7 @@
 //Member functions
 
 
-String::String(const char* str="")
+String::String(const char* str)
 {
 	if (nullptr == str)
 	{

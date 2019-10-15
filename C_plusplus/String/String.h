@@ -7,7 +7,7 @@ class String
 public:
 	typedef char* iterator;
 public:
-	String(const char* str);
+	String(const char* str="");
 	String(size_t n, char ch);
 	String(char* begin, char* end);
 	String(const String& s);
