@@ -57,8 +57,24 @@ namespace bite
 		{
 			_pCur = _pCur->_pPre;
 		}
-		Self operator--(int);
 
-			Node* _pCur;
+		Self operator--(int)
+		{
+			Self temp(*this);
+			_pCur = _pCur->_pPre;
+			return temp;
+		}
+
+		bool operator!=(const Self& s)
+		{
+			return _pCur == s._pCur;
+		}
+
+		bool operator==(const Self& s)
+		{
+			return _pCur == s._pCur;
+		}
+
+		Node* _pCur;
 	};
 }
