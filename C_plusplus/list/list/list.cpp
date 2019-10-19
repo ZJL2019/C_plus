@@ -77,4 +77,73 @@ namespace bite
 
 		Node* _pCur;
 	};
+
+	template<class Iterator, class T>
+	struct list_reverse_iterator
+	{
+		typedef list_reverse_iterator<Iterator ,T> Self;
+	public:
+		list_reverse_iterator(Iterator it)
+			:_it(it)
+		{}
+
+		T& operator*()
+		{
+			Iterator temp = _it;
+			--temp;
+			return *temp;
+		}
+
+		T* operator->()
+		{
+			return &(operator*());
+		}
+
+		Self& operator++()
+		{
+			--_it;
+			return *this;
+		}
+		Self operator++(int)
+		{
+			Self temp(*this);
+			_it--;
+			return temp;
+		}
+
+		Self& operator--()
+		{
+			++_it;
+			return *this;
+		}
+		Self operator--(int)
+		{
+			Self temp(*this);
+			_it++;
+			return temp;
+		}
+
+		bool operator!=(const Self& s)
+		{
+			return _it != s._it;
+		}
+		bool operator==(const Self& s)
+		{
+			return _it == s._it;
+		}
+		Iterator _it;
+	};
+
+	template<class T>
+	class list
+
+	{
+		typedef ListNode<T> Node;
+	public:
+		typedef list_iterator<T> iterator;
+		typedef list_reverse_iterator<iterator, T> reverse_iterator;
+	protected:
+		Node* _pHead;
+	};
+	
 }
