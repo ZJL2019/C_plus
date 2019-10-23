@@ -7,6 +7,7 @@ using namespace std;
 #include<vector>
 #include<functional>
 
+#if 0
 /*
 template<class T,class Container=vector<T>,class Compare=less<typename Container::value_type>>
 class priority_queue;
@@ -38,7 +39,7 @@ int main()
 	cout << q2.top() << endl;
 	return 0;
 }
-
+#endif
 
 #if 0
 class Date
