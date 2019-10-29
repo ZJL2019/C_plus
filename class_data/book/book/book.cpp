@@ -1,7 +1,7 @@
 
 #include<iostream>
 using namespace std;
-
+#include<iomanip>
 #define BOOK_ISBN 15
 #define BOOK_NAME 30
 #define BOOK_PRI 10
@@ -177,11 +177,11 @@ public:
 	void print(const List_book<T>& L)
 	{
 		Node* pCur = _phead->_pNext;
-		cout << "BOOK_ISBN" << "     " << "BOOK_NAME" << "      " << "BOOK_PRI";
+		cout << left << setw(10) << "BOOK_ISBN" << setw(10) << "BOOK_NAME" << setw(10) << "BOOK_PRI";
 		cout << endl;
 		while (pCur != _phead)
 		{
-			cout << pCur->_data.ISBN << "     " << pCur->_data.BOOK << "     " << pCur->_data.PRI;
+			cout << left << setw(10) << pCur->_data.ISBN << setw(10) << pCur->_data.BOOK << setw(10) << pCur->_data.PRI;
 			cout << endl;
 			pCur = pCur->_pNext;
 		}
@@ -190,7 +190,7 @@ public:
 	void modify(Iterator pos)
 	{
 		Node* pCur = pos._pCur;
-		cout << pCur->_data.ISBN << "     " << pCur->_data.BOOK << "     " << pCur->_data.PRI;
+		cout <<left<<setw(10)<< pCur->_data.ISBN <<setw(10)<< pCur->_data.BOOK <<setw(10)<< pCur->_data.PRI;
 		cout << endl;
 		cout << "BOOK_ISBN:";
 		cin >> pCur->_data.ISBN;
@@ -282,26 +282,48 @@ int main()
 	MENU();
 	int n = 0;
 loop:
-	cout << "请选择功能：" << endl;
+	cout << "请选择功能：";
 	cin >> n;
 	int i = 0;
+	int k = false;
 	switch (n)
 	{
 	case 1:
-		
-		cout << "录入几本书：";
-		cin >> i;
-		while (i > 0)
+		cout << "输入1为从前录入，(默认从后录入):";
+		cin >> k;
+		if (k==1)
 		{
-			cout << "BOOK_ISBN:";
-			cin >> b1.ISBN;
-			cout << "BOOK_NAME:";
-			cin >> b1.BOOK;
-			cout << "BOOK_PRI:";
-			cin >> b1.PRI;
-			L.push_back(b1);
-			i--;
-			cout << endl;
+			cout << "录入几本书：";
+			cin >> i;
+			while (i > 0)
+			{
+				cout << "BOOK_ISBN:";
+				cin >> b1.ISBN;
+				cout << "BOOK_NAME:";
+				cin >> b1.BOOK;
+				cout << "BOOK_PRI:";
+				cin >> b1.PRI;
+				L.push_front(b1);
+				i--;
+				cout << endl;
+			}
+		}
+		else
+		{
+			cout << "录入几本书：";
+			cin >> i;
+			while (i > 0)
+			{
+				cout << "BOOK_ISBN:";
+				cin >> b1.ISBN;
+				cout << "BOOK_NAME:";
+				cin >> b1.BOOK;
+				cout << "BOOK_PRI:";
+				cin >> b1.PRI;
+				L.push_back(b1);
+				i--;
+				cout << endl;
+			}
 		}
 		break;
 	case 2:
