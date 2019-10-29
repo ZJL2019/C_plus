@@ -2,9 +2,9 @@
 #include<iostream>
 using namespace std;
 #include<iomanip>
-#define BOOK_ISBN 15
-#define BOOK_NAME 30
-#define BOOK_PRI 10
+#define BOOK_ISBN 50
+#define BOOK_NAME 100
+#define BOOK_PRI 50
 typedef struct book
 {
 	char ISBN[BOOK_ISBN];
@@ -165,7 +165,7 @@ public:
 		{
 			if (strcmp(pCur->_data.ISBN, find_s) == 0 || strcmp(pCur->_data.BOOK,find_s)==0 || strcmp(pCur->_data.PRI,find_s)==0)
 			{
-				cout << pCur->_data.ISBN << "     " << pCur->_data.BOOK << "     " << pCur->_data.PRI;
+				cout << left << setw(40) << pCur->_data.ISBN << setw(40) << pCur->_data.BOOK << setw(40) << pCur->_data.PRI;
 				cout << endl;
 				return Iterator(pCur);
 			}
@@ -177,11 +177,11 @@ public:
 	void print(const List_book<T>& L)
 	{
 		Node* pCur = _phead->_pNext;
-		cout << left << setw(10) << "BOOK_ISBN" << setw(10) << "BOOK_NAME" << setw(10) << "BOOK_PRI";
+		cout <<left<<setw(40) << "BOOK_ISBN" << setw(40) << "BOOK_NAME" << setw(40) << "BOOK_PRI";
 		cout << endl;
 		while (pCur != _phead)
 		{
-			cout << left << setw(10) << pCur->_data.ISBN << setw(10) << pCur->_data.BOOK << setw(10) << pCur->_data.PRI;
+			cout <<left<<setw(40) << pCur->_data.ISBN << setw(40) << pCur->_data.BOOK << setw(40) << pCur->_data.PRI;
 			cout << endl;
 			pCur = pCur->_pNext;
 		}
@@ -190,8 +190,6 @@ public:
 	void modify(Iterator pos)
 	{
 		Node* pCur = pos._pCur;
-		cout <<left<<setw(10)<< pCur->_data.ISBN <<setw(10)<< pCur->_data.BOOK <<setw(10)<< pCur->_data.PRI;
-		cout << endl;
 		cout << "BOOK_ISBN:";
 		cin >> pCur->_data.ISBN;
 		cout << "BOOK_NAME:";
@@ -225,6 +223,31 @@ public:
 		delete pDelNode;
 		return Iterator(pRet);
 	}
+
+	void sort(List_book<T>& L)
+	{
+		Node* pCur1 = _phead->_pNext;
+		Node* pCur2 = pCur1->_pNext;
+		for (pCur1; pCur1 != _phead->_pPre; pCur1 = pCur1->_pNext)
+		{
+			for (pCur2; pCur2 != _phead; pCur2 = pCur2->_pNext)
+			{
+				if (strcmp(pCur1->_data.ISBN, pCur2->_data.ISBN) > 0)
+				{
+					swap(pCur1, pCur2);
+				}
+			}
+		}
+	}
+
+	void swap(Node* pCur1, Node* pCur2)
+	{
+		T temp;
+		temp = pCur1->_data;
+		pCur1->_data = pCur2->_data;
+		pCur2->_data = temp;
+	}
+
 	void clear()
 	{
 		Node* pCur = _phead->_pNext;
@@ -252,7 +275,9 @@ void MENU()
 {
 	cout << "            图书管理系统            " << endl;
 	cout << "1、录入        2、查找       3、删除" << endl;
-	cout << "4、总数        5、更改       6、退出" << endl;
+	cout << "4、总数        5、更改       6、排序" << endl;
+	cout << "               0、退出              " << endl;
+
 }
 
 int FindWay()
@@ -360,6 +385,10 @@ loop:
 		L.modify(L.find(c));
 		break;
 	case 6:
+		L.sort(L);
+		cout << "排序完成！" << endl;
+		break;
+	case 0:
 		return 0;
 	default:
 		break;
