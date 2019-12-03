@@ -15,6 +15,7 @@
 //（2）输入已经保证合法性，不用检查输入是否是合法的牌。
 //（3）输入的顺子已经经过从小到大排序，因此不用再排序了.
 
+
 #include <iostream>
 #include <string>
 #include <algorithm>
