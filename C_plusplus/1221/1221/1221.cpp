@@ -59,6 +59,7 @@ using namespace std;
 // 在析构函数中释放资源
 
 
+#if 0
 //智能指针的简单模拟实现
 template<class T>
 class SmartPtr
@@ -120,3 +121,69 @@ int main()
 	TestSmartPtr();
 	return 0;
 }
+
+#endif
+
+//缺陷：浅拷贝
+//String--->引出的浅拷贝的问题--->深拷贝
+//不能采用深拷贝的方式进行解决
+
+
+#if 0
+template<class T>
+class SmartPtr
+{
+public:
+	SmartPtr(T* ptr = nullptr)
+		:_ptr(ptr)
+	{
+		cout << "SmartPtr()" << endl;
+	}
+
+	~SmartPtr()
+	{
+		cout << "~SmartPtr()" << endl;
+		if (_ptr)
+		{
+			delete _ptr;
+			_ptr = nullptr;
+		}
+	}
+
+	T& operator*()
+	{
+		return *_ptr;
+	}
+
+	T* operator->()
+	{
+		return _ptr;
+	}
+
+private:
+	T* _ptr;
+};
+
+
+void TestSmartPtr()
+{
+	int a = 10;
+	int *pa = &a;
+	int *pb(pa);
+
+	SmartPtr<int> sp1(new int);
+	SmartPtr<int> sp2(sp1);//使用sp1构造sp2
+}
+
+//两个指针指向同一片空间，连续释放导致程序崩溃
+int main()
+{
+	TestSmartPtr();
+	return 0;
+}
+#endif
+
+//所有不同类型的智能指针：
+//RAII:资源可以自动释放
+//类对象具有指针类似的行为：operator*()/operator->()
+//浅拷贝的解决方式
