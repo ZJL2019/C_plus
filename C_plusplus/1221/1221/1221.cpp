@@ -187,3 +187,178 @@ int main()
 //RAII:资源可以自动释放
 //类对象具有指针类似的行为：operator*()/operator->()
 //浅拷贝的解决方式
+
+
+//C++98--
+//auto_ptr
+//解决浅拷贝方式：资源转移--->当前对象
+//缺陷：p1和p2不可以同时访问同一个资源
+#if 0
+namespace my_ptr
+{
+	template<class T>
+	class auto_ptr
+	{
+	public:
+		//RAII
+		auto_ptr(T* ptr = nullptr)
+			:_ptr(ptr)
+		{}
+		
+		~auto_ptr()
+		{
+			if (_ptr)
+			{
+				delete _ptr;
+				_ptr = nullptr;
+			}
+		}
+	//具有指针类似的行为
+		T&operator*()
+		{
+			return *_ptr;
+		}
+
+		T* operator->()
+		{
+			return _ptr;
+		}
+		//解决浅拷贝问题
+		auto_ptr(auto_ptr<T>& ap)
+			:_ptr(ap._ptr)
+		{
+			ap._ptr = nullptr;
+		}
+
+		//ap3=ap2
+		auto_ptr<T>& operator=(auto_ptr<T>& ap)
+		{
+			if (this != &ap)
+			{
+				//如果当前对象管理资源，先释放资源
+				if (_ptr)
+				{
+					delete _ptr;
+				}
+				_ptr = ap._ptr;//资源转移
+				ap._ptr = nullptr;//ap与资源断开联系
+			}
+			return *this;
+		}
+
+	private:
+		T* _ptr;
+	};
+}
+#endif
+
+//增加bool_owner:标记释放 对资有释放的权利
+//改进之后的auto_ptr的实现原理
+//RAII +  operator*()/operator->() + 解决浅拷贝：资源管理权限(对资源释放的权利)转移
+#if 0
+namespace my_ptr
+{
+	template<class T>
+	class auto_ptr
+	{
+	public:
+		//RAII
+		auto_ptr(T* ptr = nullptr)
+			:_ptr(ptr)
+			,_owner(false)
+		{
+			if (_ptr)
+			{
+				_owner = true;
+			}
+		}
+
+		~auto_ptr()
+		{
+			if (_ptr&&_owner)
+			{
+				delete _ptr;
+				_ptr = nullptr;
+			}
+		}
+
+		T& operator*()
+		{
+			return *_ptr;
+		}
+
+		T*operator->()
+		{
+			return _ptr;
+		}
+
+		auto_ptr(const auto_ptr<T>& ap)
+			:_ptr(ap._ptr)
+			,_owner(ap._owner)
+		{
+			ap._owner = false;
+		}
+
+		auto_ptr<T>& operator=(const auto_ptr<T>& ap)
+		{
+			if (this != &ap)
+			{
+				if (_ptr&&_owner)
+				{
+					delete _ptr;
+				}
+				_ptr = ap._ptr;
+				_owner = ap._owner;
+				ap._owner = false;
+			}
+			return *this;
+		}
+
+	private:
+		T *_ptr;
+		mutable bool _owner;
+	};
+}
+
+void TestAutoPtr1()
+{
+	int a = 10;
+	int *pa = &a;
+	int *pb = pa;
+
+	*pa = 100;
+	*pb = 200;
+
+	my_ptr::auto_ptr<int> ap1(new int);
+	my_ptr::auto_ptr<int> ap2(ap1);
+
+	//资源转移的缺陷：ap1已和资源断开连接，不能再操作资源
+	*ap2 = 200;
+	*ap1 = 100;
+
+	my_ptr::auto_ptr<int> ap3(new int);
+	ap3 = ap2;
+}
+
+//带_owner版本的auto_ptr缺陷：可能会造成野指针--导致代码崩溃
+void TestAutoPtr2()
+{
+	my_ptr::auto_ptr<int> ap1(new int);
+	if (true)
+	{
+		my_ptr::auto_ptr<int> ap2(ap1);
+		*ap2 = 20;
+	}
+
+	//ap1是野指针
+	*ap1 = 10;
+}
+
+int main()
+{
+	//TestAutoPtr1();
+	TestAutoPtr2();
+	return 0;
+}
+#endif
+
