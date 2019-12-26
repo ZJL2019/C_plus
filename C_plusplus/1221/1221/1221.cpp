@@ -362,3 +362,329 @@ int main()
 }
 #endif
 
+#if 0
+//建议：什么情况下都不要使用auto_ptr
+
+#include<memory>
+
+int main()
+{
+	auto_ptr<int> ap1(new int);
+	auto_ptr<int> ap2(ap1);
+	return 0;
+}
+#endif
+
+//C++11:auto_ptr---->保留：资源转移实现
+//提供更靠谱的智能指针
+
+//智能指针原理：RAII(自动释放资源) + operator*()/operator->()(具有指针类似的行为) + 提供解决浅拷贝方式
+
+//浅拷贝引起的原因：默认拷贝构造函数 和 默认的赋值运算符重载
+
+// unique_ptr
+//资源不共享，资源独占
+
+#if 0
+#include<memory>
+
+int main()
+{
+	unique_ptr<int> up1(new int);
+	//unique_ptr<int> up2(up1);
+	
+	unique_ptr<int> up3(new int);
+	//up3 = up1;
+	return 0;
+}
+#endif
+
+
+#if 0
+//解决浅拷贝的方式：资源独占(只能一个对象使用，不能共享)-->实现：禁止调用构造拷贝和赋值运算符重载
+namespace my_ptr
+{
+	template<class T>
+	class unique_ptr
+	{
+	public:
+		//RAII
+		unique_ptr(T* ptr=nullptr)
+			:_ptr(ptr)
+		{}
+
+		~unique_ptr()
+		{
+			if (_ptr)
+			{
+				delete _ptr;//释放资源的方式固定了，只能管理new的资源，不能处理任意类型的资源
+				_ptr = nullptr;
+			}
+		}
+
+		//具有指针类似的行为
+		T& operator*()
+		{
+			return *_ptr;
+		}
+
+		T* operator->()
+		{
+			return _ptr;
+		}
+		//解决浅拷贝：禁止调用拷贝构造函数和赋值运算符重载
+		
+		//C++98
+		/*
+	private://拷贝构造的权限一定设置成为private，原因：为了防止用户自己在类外定义
+		unique_ptr(const unique_ptr<T>& up);
+		unique_ptr<T>& operator=(const unique_ptr<T>&);
+		*/
+
+		//C++11 禁止调用拷贝构造和赋值运算符重载
+		unique_ptr(const unique_ptr<T>&) = delete;
+		unique_ptr<T>& operator=(const unique_ptr<T>&) = delete;
+		//1、释放new的空间
+		//2、默认成员函数=delete：告诉编译器，删除该默认成员函数
+
+	private:
+		T* _ptr;
+	};
+	//用户在外部实现
+	/*template<class T>
+	unique_ptr<T>::unique_ptr(const unique_ptr<T>& up)
+	{}*/
+}
+
+
+void TestUniquePtr()
+{
+	my_ptr::unique_ptr<int> up1(new int);
+	//my_ptr::unique_ptr<int> up2(up1);
+
+	my_ptr::unique_ptr<int>up3(new int);
+	//up3 = up1;
+}
+
+#endif
+
+#if 0
+#include<memory>
+#include<malloc.h>
+
+int main()
+{
+	unique_ptr<int> up1(new int);
+	unique_ptr<int> up2((int*)malloc(sizeof(int)));
+	return 0;
+}
+
+#endif
+
+
+#if 0
+template<class T>
+class DFDef
+{
+public:
+	void operator()(T*& p)
+	{
+		if (p)
+		{
+			delete p;
+			p = nullptr;
+		}
+	}
+};
+
+template<class T>
+class Free
+{
+public:
+	void operator()(T*& p)
+	{
+		if (p)
+		{
+			free(p);
+			p = nullptr;
+		}
+	}
+};
+
+
+class FClose
+{
+public:
+	void operator()(FILE*& p)
+	{
+		if (p)
+		{
+			fclose(p);
+			p = nullptr;
+		}
+	}
+};
+
+namespace my_ptr
+{
+	template<class T,class DF=DFDef<T>>
+	class unique_ptr
+	{
+	public:
+		unique_ptr(T* ptr=nullptr)
+			:_ptr(ptr)
+		{}
+
+		~unique_ptr()
+		{
+			if (_ptr)
+			{
+				DF df;
+				df(_ptr);
+				_ptr = nullptr;
+			}
+		}
+
+		T& operator*()
+		{
+			return *_ptr;
+		}
+
+		T* operator->()
+		{
+			return _ptr;
+		}
+
+		unique_ptr(const unique_ptr<T>&) = delete;
+		unique_ptr<T>& operator=(const unique_ptr<T>&) = delete;
+
+	private:
+		T* _ptr;
+	};
+}
+
+
+void TestUniquePtr()
+{
+	my_ptr::unique_ptr<int> up1(new int);
+	my_ptr::unique_ptr<int, Free<int>> up2((int*)malloc(sizeof(int)));
+	my_ptr::unique_ptr<FILE, FClose> up3(fopen("1.txt", "w"));
+}
+
+int main()
+{
+	TestUniquePtr();
+	return 0;
+}
+
+#endif
+
+namespace my_ptr
+{
+	template<class T>
+	class shared_ptr
+	{
+	public:
+		shared_ptr(T* ptr=nullptr)
+			:_ptr(ptr)
+			,_pCount(nullptr)
+		{
+			if (_ptr)
+			{
+				_pCount = new int(1);
+			}
+		}
+
+		~shared_ptr()
+		{
+			if (_ptr && 0 == --*_pCount)
+			{
+				delete _ptr;
+				delete _pCount;
+			}
+		}
+
+		T& operator*()
+		{
+			return *_ptr;
+		}
+
+		T* operator->()
+		{
+			return _ptr;
+		}
+
+		shared_ptr(const shared_ptr<T>& sp)
+			:_ptr(sp._ptr)
+			,_pCount(sp._pCount)
+		{
+			if (_ptr)
+			{
+				++*_pCount;
+			}
+		}
+
+		shared_ptr<T>& operator=(const shared_ptr<T>& sp)
+		{
+			if (this != &sp)
+			{
+				//1、与旧资源断开联系
+				//this现在不是用自己的资源，要与sp对象共享资源
+				if (_ptr && 0 == --*_pCount)
+				{
+					//当前对象是最后一个使用资源的对象
+					delete _ptr;
+					delete _pCount;
+				}
+				//2、与sp共享资源及计数
+				_ptr = sp._ptr;
+				_pCount = sp._pCount;
+				if (_ptr)
+				{
+					++*_pCount;
+				}
+			}
+			return *this;
+		}
+
+		int use_count()
+		{
+			return *_pCount;
+		}
+
+	private:
+		T* _ptr;
+		int* _pCount;
+	};
+}
+
+void TestShardPtr()
+{
+	my_ptr::shared_ptr<int> sp1(new int);
+	cout << sp1.use_count() << endl;
+
+	my_ptr::shared_ptr<int>sp2(sp1);
+	cout << sp1.use_count() << endl;
+	cout << sp2.use_count() << endl;
+
+	my_ptr::shared_ptr<int> sp3(new int);
+	cout << sp3.use_count() << endl;
+
+	my_ptr::shared_ptr<int> sp4(sp3);
+	cout << sp3.use_count() << endl;
+	cout << sp4.use_count() << endl;
+
+	sp3 = sp2;
+	cout << sp2.use_count() << endl;
+	cout << sp3.use_count() << endl;
+
+	sp4 = sp2;
+	cout << sp2.use_count() << endl;
+	cout << sp4.use_count() << endl;
+}
+
+int main()
+{
+	TestShardPtr();
+	return 0;
+}
