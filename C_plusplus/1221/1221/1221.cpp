@@ -579,6 +579,9 @@ int main()
 
 #endif
 
+
+
+#if 0
 namespace my_ptr
 {
 	template<class T>
@@ -688,3 +691,168 @@ int main()
 	TestShardPtr();
 	return 0;
 }
+
+#endif
+
+//定制删除器：让用户可以控制资源具体的释放操作
+//不是线程安全的
+
+#include<mutex>
+
+template<class T>
+class DFDef
+{
+public:
+	void operator()(T*& ptr)
+	{
+		if (ptr)
+		{
+			delete ptr;
+			ptr = nullptr;
+		}
+	}
+};
+
+
+namespace my_ptr
+{
+	template<class T,class DF=DFDef<T>>
+	class shared_ptr
+	{
+	public:
+		shared_ptr(T* ptr=nullptr)
+			:_ptr(ptr)
+			,_pCount(nullptr)
+			,_pMutex(nullptr)
+		{
+			if (_ptr)
+			{
+				_pCount = new int(1);
+				_pMutex = new mutex;
+			}
+		}
+
+		~shared_ptr()
+		{
+			Release();
+		}
+
+		T& operator*()
+		{
+			return *_ptr;
+		}
+
+		T* operator->()
+		{
+			return _ptr;
+		}
+
+		shared_ptr(const shared_ptr<T>& sp)
+			:_ptr(sp._ptr)
+			,_pCount(sp._pCount)
+			,_pMutex(sp._pMutex)
+		{
+			AddRef();
+		}
+
+		shared_ptr<T>& operator=(const shared_ptr<T>& sp)
+		{
+			if (this != &sp)
+			{
+				Release();
+				_ptr = sp._ptr;
+				_pCount = sp._pCount;
+				if (_ptr)
+				{
+					AddRef();
+				}
+			}
+			return *this;
+		}
+
+		int use_count()
+		{
+			return *_pCount;
+		}
+
+	private:
+		void AddRef()
+		{
+			if (_pCount)
+			{
+				_pMutex->lock();
+				++*_pCount;
+				_pMutex->unlock();
+			}
+		}
+
+		int SubRef()
+		{
+			if (_pCount)
+			{
+				_pMutex->lock();
+				--*_pCount;
+				_pMutex->unlock();
+			}
+			return *_pCount;
+		}
+
+		void Release()
+		{
+			if (_ptr && 0 == SubRef())
+			{
+				DF() (_ptr);
+				delete _pCount;
+			}
+		}
+
+	private:
+		T* _ptr;
+		int* _pCount;
+		mutex* _pMutex;
+	};
+}
+
+struct Date
+{
+	Date()
+	{
+		_year = _month = _day = 0;
+	}
+	int _year;
+	int _month;
+	int _day;
+};
+
+//1、shared_ptr的引用计数是否安全---mutex
+//2、shared_ptr所管理的用户数据是否线程安全
+
+void SharedPtrFunc(my_ptr::shared_ptr<Date>& sp, size_t n)
+{
+	for (size_t i = 0; i < n; ++i)
+	{
+		my_ptr::shared_ptr<Date> copy(sp);
+
+		copy->_year++;
+		copy->_month++;
+		copy->_day++;
+	}
+}
+
+#include<thread>
+
+
+int main()
+{
+	my_ptr::shared_ptr<Date> sp(new Date);
+
+	thread t1(SharedPtrFunc, sp, 100000);
+	thread t2(SharedPtrFunc, sp, 100000);
+
+	t1.join();
+	t2.join();
+	return 0;
+}
+
+
+
