@@ -694,6 +694,8 @@ int main()
 
 #endif
 
+
+#if 0
 //定制删除器：让用户可以控制资源具体的释放操作
 //不是线程安全的
 
@@ -851,6 +853,53 @@ int main()
 
 	t1.join();
 	t2.join();
+	return 0;
+}
+
+#endif
+
+
+#include<memory>
+
+struct ListNode
+{
+	ListNode(int data = 0)
+		:pre(nullptr)
+		,next(nullptr)
+		,_data(data)
+	{
+		cout << "ListNode(int):" << this << endl;
+	}
+
+	~ListNode()
+	{
+		cout << "~ListNode():" << this << endl;
+	}
+
+	shared_ptr<ListNode> pre;
+	shared_ptr<ListNode> next;
+	int _data;
+};
+
+
+void TestListNode()
+{
+	shared_ptr<ListNode> sp1(new ListNode(10));
+	shared_ptr<ListNode> sp2(new ListNode(20));
+
+	cout << sp1.use_count() << endl;
+	cout << sp2.use_count() << endl;
+
+	sp1->next = sp2;
+	sp2->pre = sp1;
+
+	cout << sp1.use_count() << endl;
+	cout << sp2.use_count() << endl;
+}
+
+int main()
+{
+	TestListNode();
 	return 0;
 }
 
