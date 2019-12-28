@@ -858,7 +858,7 @@ int main()
 
 #endif
 
-
+#if 0
 #include<memory>
 
 struct ListNode
@@ -902,6 +902,146 @@ int main()
 	TestListNode();
 	return 0;
 }
+#endif
 
 
+#if 0
+#include<memory>
 
+struct ListNode
+{
+	ListNode(int data = 0)
+		:_data(data)
+	{
+		cout << "ListNode(int):" << this << endl;
+	}
+
+	~ListNode()
+	{
+		cout << "ListNode():" << this << endl;
+	}
+
+	weak_ptr<ListNode> pre;
+	weak_ptr<ListNode> next;
+	int _data;
+};
+
+void TestListNode()
+{
+	shared_ptr<ListNode> sp1(new ListNode(10));
+	shared_ptr<ListNode> sp2(new ListNode(20));
+
+	cout << sp1.use_count() << endl;
+	cout << sp2.use_count() << endl;
+
+	sp1->next = sp2;
+	sp2->pre = sp1;
+
+	cout << sp1.use_count() << endl;
+	cout << sp2.use_count() << endl;
+}
+
+int main()
+{
+	weak_ptr<int> sp1;//可以编译成功
+	//weak_ptr<int> sp2(new int);// 编译失败 weak_ptr不能独立管理资源
+	TestListNode();
+	return 0;
+}
+#endif
+
+
+#if 0
+int main()
+{
+	int a = 10;
+	double d = 12.34;
+	a = d;//隐式类型转化
+
+	int *pa = &a;
+
+	pa = (int*)&d;//显示类型转化
+	cout << &d << endl;
+	cout << pa << endl;
+
+	const int c = 10;
+	int *pc = (int*)&c;//const int*
+	return 0;
+
+}
+#endif
+
+#if 0
+class B
+{
+public:
+	int _b;
+};
+
+
+class D :public B
+{
+public:
+	int _d;
+};
+
+int main()
+{
+	B b;
+	D d;
+	D *pd = (D*)&b;
+	pd->_d = 10;
+	return 0;
+}
+
+#endif
+
+
+#if 0
+int main()
+{
+	int a = 10;
+	double d = 12.34;
+
+	a = static_cast<int>(d);//静态类型转化--隐式类型转化，不可用于不同类型转化
+
+	int *pa = reinterpret_cast<int *>(&d);//用于不同类型的转化
+
+	const int c = 10;
+	int *pc = const_cast<int*>(&c);//用于const类型的转化
+	return 0;
+}
+#endif
+
+class A
+{
+public:
+	virtual void f(){}
+};
+
+class B :public A
+{
+
+};
+
+//从基类--->子类   向下转化---->不安全的
+//从子类--->基类   向上转化---->安全
+
+void fun(A *pa)
+{
+	//dynamic_cast会检查是否能成功转化，能成功则转化，不能则返回
+	B* pb1 = static_cast<B*>(pa);
+	B* pb2 = dynamic_cast<B*>(pa);
+	cout << "pb1:" << pb1 << endl;
+	cout << "pb2:" << pb2 << endl;
+}
+
+int main()
+{
+	A a;
+	B b;
+	fun(&a);
+	fun(&b);
+	
+	return 0;
+}
