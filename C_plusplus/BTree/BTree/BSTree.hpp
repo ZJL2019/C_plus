@@ -90,7 +90,61 @@ public:
 				pCur = pCur->_pRight;
 			}
 		}
+		if (nullptr == pCur)
+			return false;
+		Node* pDelNode = pCur;
+		//pCur可能是叶子结点 || 只有右孩子
+		if (nullptr == pCur->_pLeft)
+		{
+			if (nullptr == pParent)
+			{
+				//pCur是根节点
+				_pRoot = pCur->_pRight;
+			}
 
+			else
+			{
+				if (pCur == pParent->_pLeft)
+					pParent->_pLeft = pCur->_pRight;
+				else
+					pParent->_pRight = pCur->_pRight;
+			}
+		}
+		else if (nullptr == pCur->_pRight)
+		{
+			if (nullptr == pParent)
+				_pRoot = pCur->_pLeft;
+			else
+			{
+				if (pCur == pParent->_pLeft)
+					pParent->_pLeft = pCur->_pLeft;
+				else
+					pParent->_pRight = pCur->_pLeft;
+			}
+		}
+		else
+		{
+			//左右孩子均存在
+			//在pCur的右子树中找一个代替结点-->一定是右子树中最小的结点（最左侧结点）
+			Node* pDel = pCur->_pRight;
+			pParent = pCur;
+			while (pDel->_pLeft)
+			{
+				pParent = pDel;
+				pDel = pDel->_pLeft;
+			}
+			pCur->_data = pDel->_data;
+			//删除代替结点pDel
+
+			if (pParent->_pLeft == pDel)
+				pParent->_pLeft = pDel->_pRight;
+			else
+				pParent->_pRight = pDel->_pRight;
+
+			pDelNode = pDel;
+		}
+		delete pDelNode;
+		return true;
 	}
 
 
