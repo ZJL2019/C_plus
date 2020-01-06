@@ -4,6 +4,7 @@
 #include<queue>
 using namespace std;
 
+//Huffman树节点
 template <class W>
 struct HuffManTreeNode
 {
@@ -21,6 +22,7 @@ struct HuffManTreeNode
 	W _weight;//结点权值
 };
 
+//优先级队列比较方法
 template<class W>
 class Less
 {
@@ -32,6 +34,7 @@ public:
 	}
 };
 
+//哈夫曼树
 template <class W>
 class HuffManTree
 {
@@ -74,6 +77,11 @@ public:
 			q.push(pParent);
 		}
 		_pRoot = q.top();
+	}
+
+	Node* GetProot()
+	{
+		return _pRoot;
 	}
 
 	~HuffManTree()
