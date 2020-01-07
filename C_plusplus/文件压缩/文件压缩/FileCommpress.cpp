@@ -19,7 +19,6 @@ FileCompress::FileCompress()
 void FileCompress::CompressFile(const string& path)
 {
 	//1、统计源文件中每个字符出现的次数
-
 	FILE* fIn = fopen(path.c_str(), "rb");
 	if (nullptr == fIn)
 	{
@@ -175,7 +174,7 @@ void FileCompress::WriteHead(FILE* fOut, const string& fileName)
 	string strChCount;
 	char szValue[32] = { 0 };
 
-	for (int i = 0; i < 256; i++)
+	for (int i = 0; i <_fileInfo.size(); i++)
 	{
 		CharInfo& charInfo = _fileInfo[i];
 		if (charInfo._count)
@@ -207,7 +206,7 @@ void FileCompress::UnCompressFile(const string& path)
 		assert(false);
 		return;
 	}
-
+	
 	//文件后缀
 	string strFilePostFix;
 	ReadLine(fIn, strFilePostFix);
@@ -233,8 +232,7 @@ void FileCompress::UnCompressFile(const string& path)
 	}
 
 	//还原Huffman树
-	HuffManTree<CharInfo> t;
-	t.CreatHuffManTree(_fileInfo, CharInfo(0));
+	HuffManTree<CharInfo> t(_fileInfo, CharInfo());
 
 	FILE* fOut = fopen("3.txt", "wb");
 
@@ -246,21 +244,21 @@ void FileCompress::UnCompressFile(const string& path)
 	HuffManTreeNode<CharInfo>* pCur = t.GetProot();
 	size_t fileSize = pCur->_weight._count;
 	size_t unCount = 0;
+
 	while (true)
 	{
 		size_t rdSize = fread(pReadBuff,1,1024,fIn);
 
 		if (rdSize == 0)
 			break;
-
+		unsigned char tmp = 0x80;
 		for (size_t i = 0; i < rdSize; i++)
 		{
 			//只需要将一个字节中8个bit位单独处理
 			ch = pReadBuff[i];
-
 			for (int pos = 0; pos < 8; pos++)
 			{
-				if (ch & 0x80)
+				if (ch&0x80)
 				{
 					pCur = pCur->_pRight;
 				}
@@ -268,7 +266,7 @@ void FileCompress::UnCompressFile(const string& path)
 				{
 					pCur = pCur->_pLeft;
 				}
-
+				
 				ch <<= 1;
 
 				if (nullptr == pCur->_pLeft&&nullptr == pCur->_pRight)
