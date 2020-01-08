@@ -19,7 +19,7 @@ FileCompress::FileCompress()
 void FileCompress::CompressFile(const string& path)
 {
 	//1、统计源文件中每个字符出现的次数
-	FILE* fIn = fopen(path.c_str(), "rb");
+	FILE* fIn = fopen(path.c_str(), "r");
 	if (nullptr == fIn)
 	{
 		assert(false);
@@ -234,7 +234,7 @@ void FileCompress::UnCompressFile(const string& path)
 	//还原Huffman树
 	HuffManTree<CharInfo> t(_fileInfo, CharInfo());
 
-	FILE* fOut = fopen("3.txt", "wb");
+	FILE* fOut = fopen("3.txt", "w");
 
 	//解压缩
 	char* pReadBuff = new char[1024];
