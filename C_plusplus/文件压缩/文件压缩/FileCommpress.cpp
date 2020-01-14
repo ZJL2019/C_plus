@@ -19,7 +19,17 @@ FileCompress::FileCompress()
 void FileCompress::CompressFile(const string& path)
 {
 	//1、统计源文件中每个字符出现的次数
+	
 	FILE* fIn = fopen(path.c_str(), "r");
+	//if (GetFilePostFix(path) == ".txt")
+	//{
+	//	fIn = fopen(path.c_str(), "r");
+	//}
+	//else
+	//{
+	//	fIn = fopen(path.c_str(), "rb");
+	//}
+
 	if (nullptr == fIn)
 	{
 		assert(false);
@@ -254,6 +264,16 @@ void FileCompress::UnCompressFile(const string& path)
 		unsigned char tmp = 0x80;
 		for (size_t i = 0; i < rdSize; i++)
 		{
+			if (nullptr == pCur->_pLeft&&nullptr == pCur->_pRight)
+			{
+				//unCount++;
+				//fputc(pCur->_weight._ch, fOut);
+
+				if (unCount == fileSize)
+					break;
+
+				pCur = t.GetProot();
+			}
 			//只需要将一个字节中8个bit位单独处理
 			ch = pReadBuff[i];
 			for (int pos = 0; pos < 8; pos++)
