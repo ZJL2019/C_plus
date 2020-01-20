@@ -2,14 +2,15 @@
 #include<iostream>
 using namespace std;
 
+#if  0
 // binary search tree
 template<class T>
 struct BSTNode
 {
 	BSTNode(const T& data = T())
 		:_pLeft(nullptr)
-		,_pRight(nullptr)
-		,_data(data)
+		, _pRight(nullptr)
+		, _data(data)
 	{
 	}
 	BSTNode<T> *_pLeft;
@@ -71,7 +72,7 @@ public:
 	{
 		if (nullptr == _pRoot)
 			return false;
-		
+
 		//找待删除结点的位置
 		Node *pCur = _pRoot;
 		Node *pParent = nullptr;
@@ -79,7 +80,7 @@ public:
 		{
 			if (data == pCur->_data)
 				break;
-			else if(data<pCur->_data)
+			else if (data < pCur->_data)
 			{
 				pParent = pCur;
 				pCur = pCur->_pLeft;
@@ -147,6 +148,164 @@ public:
 		return true;
 	}
 
+	Node* Find(const T& data)
+	{
+		Node* pCur = _pRoot;
+		while (pCur)
+		{
+			if (data == pCur->_data)
+				return pCur;
+			else if (data < pCur->_data)
+				pCur = pCur->_pLeft;
+			else
+				pCur = pCur->_pRight;
+		}
+		return nullptr;
+	}
+
+	//验证：
+	void InOrder()
+	{
+		_InOrder(_pRoot);
+	}
+
+	Node* LeftMost()
+	{
+		if (nullptr == _pRoot)
+			return nullptr;
+		Node* pCur = _pRoot;
+		while (pCur->_pLeft)
+		{
+			pCur = pCur->_pLeft;
+		}
+		return pCur;
+	}
+
+	Node* RightMost()
+	{
+		if (nullptr == _pRoot)
+			return nullptr;
+		Node* pCur = _pRoot;
+		while (pCur->_pRight)
+		{
+			pCur = pCur->_pRight;
+		}
+		return pCur;
+	}
+
+private:
+	void _InOrder(Node* pRoot)
+	{
+		if (pRoot)
+		{
+			_InOrder(pRoot->_pLeft);
+			cout << pRoot->_data << " ";
+			_InOrder(pRoot->_pRight);
+		}
+	}
+
+private:
+	Node* _pRoot;
+};
+
+
+
+void TestBSTree()
+{
+	BSTree<int> t;
+	int a[] = { 5,3,4,1,7,8,2,6,0,9 };
+	for (auto e : a)
+	{
+		t.Insert(e);
+	}
+	t.InOrder();
+	cout << endl;
+	cout << t.LeftMost()->_data << endl;
+	cout << t.RightMost()->_data << endl;
+
+	t.Delete(6);
+	t.InOrder();
+	cout << endl;
+
+	t.Delete(8);
+	t.InOrder();
+	cout << endl;
+
+	t.Delete(5);
+	t.InOrder();
+	cout << endl;
+}
+
+#endif
+
+//K - V
+
+template<class K,class V>
+struct BSTNode
+{
+	BSTNode(const K& key,const V& value)
+		:_pLeft(nullptr)
+		,_pRight(nullptr)
+		,_key(key)
+		,_value(value)
+	{}
+
+	BSTNode<T>* _pLeft;
+	BSTNode<T>* _pRight;
+	K _key;
+	V _value;
+};
+
+template<class K ,class V>
+class BSTree
+{
+	typedef BSTNode<K, V> Node;
+public:
+	BSTree()
+		:_pRoot(nullptr)
+	{}
+
+	Node* Find(const K& key)
+	{
+		Node* pCur = _pRoot;
+		while (pCur)
+		{
+			if (key == pCur->_key)
+				return pCur;
+			else if (key < pCur->_key)
+				pCur = pCur->_pLeft;
+			else
+				pCur = pCur->_pRight;
+		}
+		return nullptr;
+	}
+
+	bool Insert(const K& key, const V& value)
+	{
+		if (nullptr == _pRoot)
+		{
+			_pRoot = new Node(key, value);
+			return true;
+		}
+		Node* pCur = _pRoot;
+		Node* pParent = nullptr;
+		while (pCur)
+		{
+			pParent = pCur;
+			if (key < pCur->_key)
+				pCur = pCur->_pLeft;
+			else if (key > pCur->_pRight)
+				pCur = pCur->_pRight;
+			else
+				return true;
+		}
+		pCur = new Node(key, value);
+		if (key < pParent->_key)
+			pParent->_pLeft = pCur;
+		else
+			pParent->_pRight = pCur;
+		return true;
+	}
 
 private:
 	Node* _pRoot;
