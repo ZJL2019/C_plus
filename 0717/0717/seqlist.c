@@ -101,7 +101,7 @@ void SeqListRemoveAll(SeqList* psl, SLDataType x)
 	int gap = 0;
 	for (i = 0; i < psl->size; i++)
 	{
-		if (psl->array[i + gap] == x)
+		if (psl->array[i] == x)
 		{
 			gap++;
 		}

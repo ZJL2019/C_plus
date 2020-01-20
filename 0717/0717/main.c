@@ -21,11 +21,13 @@ int main()
 	SeqListInsert(&test, 2, 5);
 	SeqListErase(&test, 2);
 	SeqListRemove(&test, 5);
-	SeqListModify(&test, 1, 9);
+	SeqListModify(&test, 1, 4);
+	SeqListModify(&test, 2, 9);
+
 	SeqListPrint(&test);
 	SeqListRemoveAll(&test, 9);
 	SeqListRemoveAllN(&test, 9);
-	SeqListBubbleSort(&test);
+	//SeqListBubbleSort(&test);
 	SeqListPrint(&test);
 	printf("%d\n", SeqListDiscFind(&test, 2, 0, 5));
 	printf("%d\n",SeqListFind(&test, 1));
