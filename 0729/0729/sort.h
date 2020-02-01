@@ -15,7 +15,6 @@ void SelectSort(int *arr, int n);
 void Qsort2(int *arr, int n);
 void dealQsort2(int *arr, int start, int end);
 void printArray(int *arr, int n);
-void swap(int *a, int*b);
 int Partition(int *arr, int start, int end);
 void dealQsort3(int *arr, int start, int end);
 void Qsort3(int *arr, int n);//hoare

@@ -159,8 +159,8 @@ void dealQsort2(int *arr, int start, int end)
 		flag ? j-- : i++;
 	}
 	arr[i] = tmp;
-	dealQsort(arr, start, i - 1);
-	dealQsort(arr, i + 1, end);
+	dealQsort2(arr, start, i - 1);
+	dealQsort2(arr, i + 1, end);
 }
 
 int Partition(int *arr, int start, int end)
