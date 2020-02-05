@@ -60,7 +60,7 @@ namespace bite
 			swap(_start, v._start);
 			_finish = _start + v.size();
 			_endofstorage = _start + v.size();
-			*this;
+			return *this;
 		}
 
 		~vector()
