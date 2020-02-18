@@ -8,7 +8,7 @@ int main()
 	//BubbleSort(arr, ARRSIZE(arr));
 	//ShellSort(arr, ARRSIZE(arr));
 	//MergeSort(arr, ARRSIZE(arr));
-	//QSort(arr, ARRSIZE(arr));
+	QSort(arr, ARRSIZE(arr));
 	//QSort2(arr, ARRSIZE(arr));
 	//Qsort3(arr, ARRSIZE(arr));
 	//QSortNR(arr, ARRSIZE(arr));
