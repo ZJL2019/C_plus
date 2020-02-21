@@ -35,6 +35,9 @@ void LZHashTable::Insert(USH& matchHead, UCH ch, USH pos, USH& hashAddr)
 	//与MASK的目的是为了保证不越界
 	prev_[pos&HASH_MASK] = head_[hashAddr];
 	head_[hashAddr] = pos;
+}
 
-
+USH LZHashTable::GetNext(USH matchHead)
+{
+	return prev_[matchHead&HASH_MASK];
 }

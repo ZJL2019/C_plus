@@ -1,5 +1,10 @@
 #include "LZ77.h"
 #include <iostream>
+
+const USH MIN_LOOKAHEAD = MAX_MATCH + MIN_MATCH + 1;
+const USH MAX_DIST = WSIZE - MIN_LOOKAHEAD;
+
+
 LZ77::LZ77()
 	:pWin_(new UCH[WSIZE*2])
 	,ht_(WSIZE)
@@ -36,7 +41,7 @@ void LZ77::CompressFile(const std::string& strFilePath)
 	fseek(fIn, 0, SEEK_SET);
 	
 	//读取数据至缓冲区
-	USH lookHead = fread(pWin_, 1, 2 * WSIZE, fIn);
+	USH lookAhead = fread(pWin_, 1, 2 * WSIZE, fIn);
 
 	USH hashAddr = 0;
 
@@ -47,55 +52,207 @@ void LZ77::CompressFile(const std::string& strFilePath)
 	}
 
 	//压缩
-	FILE* fOUT = fopen("2.lzp", "wr");
-	if (nullptr == fOUT)
+	//压缩文件
+	FILE* fOut = fopen("2.lzp", "wb");
+	if (nullptr == fOut)
 	{
 		std::cout << "Open File Failed!" << std::endl;
 		return;
 	}
 
 	USH start = 0;
+	
+	//与查找最长匹配相关变量
 	USH matchHead = 0;
-	UCH curMatchLength = 0;
+	USH curMatchLength = 0;
 	USH curMatchDist = 0;
 
+	//与标记相关变量
+	UCH chFlag = 0;
+	UCH bitCount = 0;
+	
+	//写标记的文件
+	FILE* fOutF = fopen("3.txt", "wb");
+
 	//lookHead表示先行缓冲区中剩余的元素
-	while (lookHead)
+	while (lookAhead)
 	{
 		ht_.Insert(matchHead, pWin_[start + 2], start, hashAddr);
+		curMatchLength = 0;
+		curMatchDist = 0;  
 		if (matchHead)
 		{
-			curMatchLength= LongestMatch(matchHead, curMatchDist);
+			curMatchLength= LongestMatch(matchHead, curMatchDist,start);
 		}
+		 //是原字符
 		if (curMatchLength < MIN_MATCH)
 		{
+			fputc(pWin_[start], fOut);
+			WriteFlag(fOutF, chFlag, bitCount, false);
 			++start;
-			lookHead--;
+			lookAhead--;
 		}
+
+		//是长度对
 		else
 		{
-			fputc(curMatchLength, fOUT);
-			fwrite(&curMatchDist, sizeof(curMatchDist), 1, fOUT);
+			//写长度
+			UCH chlen = curMatchLength - 3;
+			fputc(chlen, fOut);
+
+			//写距离
+			fwrite(&curMatchDist, sizeof(curMatchDist), 1, fOut);
+
+			//写标记
+			WriteFlag(fOutF, chFlag, bitCount, true);
+
 			//更新先行缓冲区
-			lookHead -= curMatchLength;
+			lookAhead -= curMatchLength;
 			
 			--curMatchLength;
 			while (curMatchLength)
 			{
 				start++;
-				ht_.Insert(matchHead, pWin_[start], start, hashAddr);
+				ht_.Insert(matchHead, pWin_[start+2], start, hashAddr);
 				curMatchLength--;
 			}
+			start++;
 		}
 	}
-
+	//标记位数不够8bit
+	if (bitCount > 0 && bitCount < 8)
+	{
+		chFlag <<= (8 - bitCount);
+		fputc(chFlag, fOutF);
+	}
+	fclose(fIn);
+	fclose(fOut);
+	fclose(fOutF);
 }
 
-UCH LZ77::LongestMatch(USH matchHead, USH& curMatchDist)
+USH LZ77::LongestMatch(USH matchHead, USH& MatchDist,USH start)
 {
-	return 0;
+	UCH curMathchLen = 0;//一次匹配长度
+	UCH maxMatchLen = 0;//最大匹配长度
+	UCH maxMatchCount = 255;//最大的匹配次数
+	USH curMatchStart = 0;//当前匹配在查找缓冲区中的起始位置
+	
+	//保证查找范围在查找缓冲区大小内
+	USH limit = start > MAX_DIST ? start - MAX_DIST : 0;
+	do
+	{
+		//匹配范围
+		UCH* pstart = pWin_ + start;
+		UCH* pend = pstart + MAX_MATCH;
+
+		//查找缓冲区中的匹配串起始
+		UCH* pMatchStart = pWin_ + matchHead;
+		curMathchLen = 0;
+
+		while (pstart < pend&&*pstart == *pMatchStart)
+		{
+			curMathchLen++;
+			pstart++;
+			pMatchStart++;
+		}
+
+		if (curMathchLen > maxMatchLen)
+		{
+			maxMatchLen = curMathchLen;
+			curMatchStart = matchHead;
+		}
+
+	} while ((matchHead = ht_.GetNext(matchHead))> limit&&maxMatchCount--);
+
+	MatchDist = start - curMatchStart;
+	return maxMatchLen;
 }
 
 void LZ77::UnCompressFile(const std::string& strFilePath)
 {
+	//打开压缩文件和标记文件
+	FILE* unfIn = fopen("2.lzp", "rb");
+	if (nullptr==unfIn)
+	{
+		std::cout << "Open Compare File Failed!" << std::endl;
+		return;
+	}
+
+	FILE* unfInF = fopen("3.txt", "rb");
+	if (nullptr == unfIn)
+	{
+		std::cout << "Open UnCompare File Failed!" << std::endl;
+		return;
+	}
+
+	//解压缩文件
+	FILE* unfOut = fopen("4.txt", "wb");
+	if (nullptr == unfIn)
+	{
+		std::cout << "Open UnCompare File Failed!" << std::endl;
+		return;
+	}
+
+	//还原匹配串
+	FILE* fR = fopen("4.txt", "rb");
+
+	UCH bitCount = 0;
+	UCH chFlag = 0;
+	while (!feof(unfIn))
+	{
+		if (0 == bitCount)
+		{
+			chFlag=fgetc(unfInF);
+			bitCount = 8;
+		}
+
+		if (chFlag & 0x80)
+		{
+			//距离长度对
+			USH matchLen = fgetc(unfIn) + 3;
+			USH matchDist = 0;
+			fread(&matchDist, sizeof(matchDist), 1, unfIn);
+			
+			//清空缓冲区
+			fflush(unfOut);
+
+			//定位前文的匹配位置
+			fseek(fR, 0 - matchDist, SEEK_END);
+			UCH ch;
+			while (matchLen)
+			{
+				ch = fgetc(fR);
+				fputc(ch, unfOut);
+				matchLen--;
+			}
+		}
+		else
+		{
+			//原字符
+			UCH ch = fgetc(unfIn);
+			fputc(ch, unfOut);
+		}
+		chFlag <<= 1;
+		bitCount--;
+	}
+	fclose(unfIn);
+	fclose(unfInF);
+	fclose(unfOut);
+	fclose(fR);
+}
+
+void LZ77::WriteFlag(FILE* fOutF, UCH& chFalg, UCH& bitCount, bool isLen)
+{
+	chFalg <<= 1;
+	if (isLen)
+	{
+		chFalg |= 1;
+	}
+	bitCount++;
+	if (bitCount == 8)
+	{
+		fputc(chFalg, fOutF);
+		chFalg = 0;
+		bitCount = 0;
+	}
 }

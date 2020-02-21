@@ -11,7 +11,8 @@ public:
 	void UnCompressFile(const std::string& strFilePath);
 
 private:
-	UCH LongestMatch(USH matchHead, USH& curMatchDist);
+	USH LongestMatch(USH matchHead, USH& curMatchDist,USH start);
+	void WriteFlag(FILE* fOutF, UCH& chFalg, UCH& bitCount, bool isLen);
 private:
 	UCH* pWin_;//±£´æ»º³åÇø
 	LZHashTable ht_;
