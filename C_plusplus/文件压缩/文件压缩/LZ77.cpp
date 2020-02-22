@@ -41,7 +41,7 @@ void LZ77::CompressFile(const std::string& strFilePath)
 	fseek(fIn, 0, SEEK_SET);
 	
 	//读取数据至缓冲区
-	USH lookAhead = fread(pWin_, 1, 2 * WSIZE, fIn);
+	size_t lookAhead = fread(pWin_, 1, 2 * WSIZE, fIn);
 
 	USH hashAddr = 0;
 
@@ -118,6 +118,10 @@ void LZ77::CompressFile(const std::string& strFilePath)
 			}
 			start++;
 		}
+		if (lookAhead <= MIN_LOOKAHEAD)
+		{
+			FillWindow(fIn, lookAhead,start);
+		}
 	}
 	//标记位数不够8bit
 	if (bitCount > 0 && bitCount < 8)
@@ -125,9 +129,58 @@ void LZ77::CompressFile(const std::string& strFilePath)
 		chFlag <<= (8 - bitCount);
 		fputc(chFlag, fOutF);
 	}
-	fclose(fIn);
-	fclose(fOut);
 	fclose(fOutF);
+	fclose(fIn);
+
+	//将标记信息和压缩数据合并
+	MergeFile(fOut, fileSize);
+	fclose(fOut);
+}
+
+void LZ77::FillWindow(FILE* fIn, size_t& lookAhead,USH& start)
+{
+	//start已经进入右窗
+	if (start >= WSIZE)
+	{
+		//1.将右窗数据搬移至左窗
+		memcpy(pWin_, pWin_ + WSIZE, WSIZE);
+		start -= WSIZE;
+		//2.更新哈希表
+		ht_.Update();
+
+		//3.向右窗中补充数据
+		if (!feof(fIn))
+		{
+			lookAhead += fread(pWin_ + WSIZE, 1, WSIZE, fIn);
+		}
+	}
+}
+
+
+
+void LZ77::MergeFile(FILE* fOut,size_t fileSize)
+{
+	FILE* fInF = fopen("3.txt", "rb");
+	size_t flagSize = 0;
+	UCH* pReadbuff = new UCH[1024];
+	while (true)
+	{
+		size_t rdSize = fread(pReadbuff, 1, 1024, fInF);
+		if (rdSize == 0)
+		{
+			break;
+		}
+		fwrite(pReadbuff, 1, rdSize, fOut);
+		flagSize += rdSize;
+	}
+	fwrite(&flagSize, sizeof(flagSize), 1, fOut);
+	fwrite(&fileSize, sizeof(fileSize), 1, fOut);
+	delete[] pReadbuff;
+	fclose(fInF);
+	if (remove("3.txt") != 0)
+	{
+		std::cout << "Remove File failed!" << std::endl;
+	}
 }
 
 USH LZ77::LongestMatch(USH matchHead, USH& MatchDist,USH start)
@@ -171,23 +224,37 @@ USH LZ77::LongestMatch(USH matchHead, USH& MatchDist,USH start)
 void LZ77::UnCompressFile(const std::string& strFilePath)
 {
 	//打开压缩文件和标记文件
-	FILE* unfIn = fopen("2.lzp", "rb");
+	FILE* unfIn = fopen(strFilePath.c_str(), "rb");
 	if (nullptr==unfIn)
 	{
 		std::cout << "Open Compare File Failed!" << std::endl;
 		return;
 	}
 
-	FILE* unfInF = fopen("3.txt", "rb");
-	if (nullptr == unfIn)
+	//操作标记数据的文件指针
+	FILE* unfInF = fopen(strFilePath.c_str(), "rb");
+	if (nullptr == unfInF)
 	{
 		std::cout << "Open UnCompare File Failed!" << std::endl;
 		return;
 	}
+	
+	//获取源文件的大小
+	ULL fileSize = 0;
+	fseek(unfInF, 0 - sizeof(fileSize), SEEK_END);
+	fread(&fileSize, sizeof(fileSize), 1, unfInF);
+	//获取标记信息的大小
+	size_t flagSize = 0;
+	fseek(unfInF, 0 - sizeof(fileSize) - sizeof(flagSize), SEEK_END);
+	fread(&flagSize, sizeof(flagSize), 1, unfInF);
+
+	//将读取标记信息的文件指针移动到保存标记数据的位置
+	fseek(unfInF, 0 - 0 - sizeof(fileSize) - sizeof(flagSize)-flagSize, SEEK_END);
+
 
 	//解压缩文件
 	FILE* unfOut = fopen("4.txt", "wb");
-	if (nullptr == unfIn)
+	if (nullptr == unfOut)
 	{
 		std::cout << "Open UnCompare File Failed!" << std::endl;
 		return;
@@ -198,7 +265,8 @@ void LZ77::UnCompressFile(const std::string& strFilePath)
 
 	UCH bitCount = 0;
 	UCH chFlag = 0;
-	while (!feof(unfIn))
+	ULL encodeCount = 0;
+	while (encodeCount<fileSize)
 	{
 		if (0 == bitCount)
 		{
@@ -215,7 +283,8 @@ void LZ77::UnCompressFile(const std::string& strFilePath)
 			
 			//清空缓冲区
 			fflush(unfOut);
-
+			//更新解码大小
+			encodeCount += matchLen;
 			//定位前文的匹配位置
 			fseek(fR, 0 - matchDist, SEEK_END);
 			UCH ch;
@@ -224,6 +293,7 @@ void LZ77::UnCompressFile(const std::string& strFilePath)
 				ch = fgetc(fR);
 				fputc(ch, unfOut);
 				matchLen--;
+				fflush(unfOut);
 			}
 		}
 		else
@@ -231,6 +301,7 @@ void LZ77::UnCompressFile(const std::string& strFilePath)
 			//原字符
 			UCH ch = fgetc(unfIn);
 			fputc(ch, unfOut);
+			encodeCount += 1;
 		}
 		chFlag <<= 1;
 		bitCount--;

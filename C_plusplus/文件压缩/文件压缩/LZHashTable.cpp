@@ -41,3 +41,29 @@ USH LZHashTable::GetNext(USH matchHead)
 {
 	return prev_[matchHead&HASH_MASK];
 }
+
+void LZHashTable::Update()
+{
+	for (USH i = 0; i < WSIZE; i++)
+	{
+		//更新head
+		if (head_[i] >= WSIZE)
+		{
+			head_[i] -= WSIZE;
+		}
+		else
+		{
+			head_[i] = 0;
+		}
+
+		//更新prev
+		if (prev_[i] >= WSIZE)
+		{
+			prev_[i] -= WSIZE;
+		}
+		else
+		{
+			prev_[i] = 0;
+		}
+	}
+}
