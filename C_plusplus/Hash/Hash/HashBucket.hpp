@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include "Common.h"
+using namespace std;
 template<class T>
 struct HashNode
 {
@@ -14,15 +15,91 @@ struct HashNode
 	T data_;
 };
 
+template<class T, class DF = DFDef<T>>
+class HashBucket;
+
 template<class T,class DF=DFDef<T>>
-class HashBucket
+struct HBIterator
 {
 	typedef HashNode<T> Node;
+	typedef HBIterator<T,DF> Self;
+	HBIterator(Node* pNode=nullptr,HashBucket<T,DF>* ht=nullptr)
+		:pNode_(pNode)
+		, ht_(ht)
+	{}
+
+	T& operator* ()
+	{
+		return pNode_->data_;
+	}
+
+	T* operator->()
+	{
+		return &(pNode_->data_);
+	}
+
+	Self& operator++()
+	{
+		Next();
+		return *this;
+	}
+
+	Self operator++(int)
+	{
+		Self temp(*this);
+		Next();
+		return temp;
+	}
+
+	bool operator != (const Self& s)
+	{
+		return pNode_ != s.pNode_;
+	}
+
+	bool operator==(const Self& s)
+	{
+		return pNode_ == s.pNode_;
+	}
+
+	void Next()
+	{
+		if (pNode_->pNext_)
+		{
+			pNode_ = pNode_->pNext_;
+		}
+		else
+		{
+			size_t bucketNo = ht_->HashFunc(pNode_->data_) + 1;
+			for (; bucketNo < ht_->table_.capacity(); bucketNo++)
+			{
+				if (ht_->table_[bucketNo])
+				{
+					pNode_ = ht_->table_[bucketNo];
+					return;
+				}
+			}
+			pNode_ = nullptr;
+		}
+	}
+
+	HashNode<T>* pNode_;
+	HashBucket<T, DF>* ht_;
+};
+
+
+template<class T,class DF>
+class HashBucket
+{
+	friend struct HBIterator<T, DF>;
+
+	typedef HashNode<T> Node;
+	typedef HBIterator<T, DF> Iterator;
+
 public:
 	HashBucket(size_t capacity = 10)
 		:size_(0)
 	{
-		table_.resize(10/*GetNextPrime(capacity)*/);
+		table_.resize(GetNextPrime(capacity));
 	}
 	//在插入时哈希桶中元素唯一
 	bool InsertUnique(const T& data)
@@ -114,6 +191,21 @@ public:
 		return size_ == 0;
 	}
 
+	Iterator begin()
+	{
+		for (size_t bucketNo = 0; bucketNo < table_.capacity(); bucketNo++)
+		{
+			if (table_[bucketNo])
+				return Iterator(table_[bucketNo], this);
+		}
+		return end();
+	}
+
+	Iterator end()
+	{
+		return Iterator(nullptr, this);
+	}
+
 	//测试
 	void PrintHashBucket()
 	{
@@ -159,6 +251,13 @@ void TestHashBucket()
 
 	ht.InsertUnique(44);
 	ht.InsertUnique(54);
+	auto it = ht.begin();
+	while (it != ht.end())
+	{
+		std::cout << *it << " ";
+		it++;
+	}
+	std::cout << std::endl;
 	ht.PrintHashBucket();
 
 	ht.EraseUnique(44);
