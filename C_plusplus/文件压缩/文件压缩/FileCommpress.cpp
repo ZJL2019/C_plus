@@ -20,7 +20,7 @@ void FileCompress::CompressFile(const string& path)
 {
 	//1、统计源文件中每个字符出现的次数
 	
-	FILE* fIn = fopen(path.c_str(), "r");
+	FILE* fIn = fopen(path.c_str(), "rb");
 	//if (GetFilePostFix(path) == ".txt")
 	//{
 	//	fIn = fopen(path.c_str(), "r");
@@ -60,7 +60,7 @@ void FileCompress::CompressFile(const string& path)
 	GenerateHuffManCode(t.GetProot());
 
 	//4、使用编码改写
-	FILE* fOut = fopen("2.txt", "wb");
+	FILE* fOut = fopen("3.lzp", "wb");
 	if (nullptr == fOut)
 	{
 		assert(false);
@@ -110,10 +110,14 @@ void FileCompress::CompressFile(const string& path)
 		ch <<= (8 - bitcount);
 		fputc(ch, fOut);
 	}
-
+	
 	delete[] pReadBuff;
 	fclose(fIn);
 	fclose(fOut);
+	if (remove("2.lzp") != 0)
+	{
+		std::cout << "Remove File failed!" << std::endl;
+	}
 }
 
 //获取文件后缀
@@ -244,7 +248,7 @@ void FileCompress::UnCompressFile(const string& path)
 	//还原Huffman树
 	HuffManTree<CharInfo> t(_fileInfo, CharInfo());
 
-	FILE* fOut = fopen("3.txt", "w");
+	FILE* fOut = fopen("4.lzp", "wb");
 
 	//解压缩
 	char* pReadBuff = new char[1024];
@@ -305,4 +309,8 @@ void FileCompress::UnCompressFile(const string& path)
 	delete[] pReadBuff;
 	fclose(fIn);
 	fclose(fOut);
+	/*if (remove("3.lzp") != 0)
+	{
+		std::cout << "Remove File failed!" << std::endl;
+	}*/
 }

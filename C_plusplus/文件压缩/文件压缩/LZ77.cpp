@@ -253,7 +253,7 @@ void LZ77::UnCompressFile(const std::string& strFilePath)
 
 
 	//解压缩文件
-	FILE* unfOut = fopen("4.txt", "wb");
+	FILE* unfOut = fopen("2.txt", "wb");
 	if (nullptr == unfOut)
 	{
 		std::cout << "Open UnCompare File Failed!" << std::endl;
@@ -261,7 +261,7 @@ void LZ77::UnCompressFile(const std::string& strFilePath)
 	}
 
 	//还原匹配串
-	FILE* fR = fopen("4.txt", "rb");
+	FILE* fR = fopen("2.txt", "rb");
 
 	UCH bitCount = 0;
 	UCH chFlag = 0;
@@ -306,10 +306,15 @@ void LZ77::UnCompressFile(const std::string& strFilePath)
 		chFlag <<= 1;
 		bitCount--;
 	}
+	
 	fclose(unfIn);
 	fclose(unfInF);
 	fclose(unfOut);
 	fclose(fR);
+	if (remove("4.lzp") != 0)
+	{
+		std::cout << "Remove File failed!" << std::endl;
+	}
 }
 
 void LZ77::WriteFlag(FILE* fOutF, UCH& chFalg, UCH& bitCount, bool isLen)
