@@ -114,10 +114,10 @@ void FileCompress::CompressFile(const string& path)
 	delete[] pReadBuff;
 	fclose(fIn);
 	fclose(fOut);
-	if (remove("2.lzp") != 0)
+	/*if (remove("2.lzp") != 0)
 	{
 		std::cout << "Remove File failed!" << std::endl;
-	}
+	}*/
 }
 
 //获取文件后缀
@@ -265,7 +265,7 @@ void FileCompress::UnCompressFile(const string& path)
 
 		if (rdSize == 0)
 			break;
-		unsigned char tmp = 0x80;
+
 		for (size_t i = 0; i < rdSize; i++)
 		{
 			if (nullptr == pCur->_pLeft&&nullptr == pCur->_pRight)
