@@ -15,15 +15,15 @@ struct HashNode
 	T data_;
 };
 
-template<class T, class DF = DFDef<T>>
+template<class T, class KOFV,class DF = DFStr>
 class HashBucket;
 
-template<class T,class DF=DFDef<T>>
+template<class T,class KOFV,class DF= DFStr>
 struct HBIterator
 {
 	typedef HashNode<T> Node;
-	typedef HBIterator<T,DF> Self;
-	HBIterator(Node* pNode=nullptr,HashBucket<T,DF>* ht=nullptr)
+	typedef HBIterator<T,KOFV,DF> Self;
+	HBIterator(Node* pNode=nullptr,HashBucket<T,KOFV,DF>* ht=nullptr)
 		:pNode_(pNode)
 		, ht_(ht)
 	{}
@@ -83,36 +83,42 @@ struct HBIterator
 	}
 
 	HashNode<T>* pNode_;
-	HashBucket<T, DF>* ht_;
+	HashBucket<T,KOFV, DF>* ht_;
 };
 
 
-template<class T,class DF>
+template<class T,class KOFV,class DF>
 class HashBucket
 {
-	friend struct HBIterator<T, DF>;
-
+	friend struct HBIterator<T, KOFV,DF>;
 	typedef HashNode<T> Node;
-	typedef HBIterator<T, DF> Iterator;
+
+public:
+	typedef HBIterator<T, KOFV,DF> iterator;
 
 public:
 	HashBucket(size_t capacity = 10)
 		:size_(0)
 	{
-		table_.resize(GetNextPrime(capacity));
+		table_.resize(GetNextPrime(10));
+	}
+	~HashBucket()
+	{
+		clear();
 	}
 	//在插入时哈希桶中元素唯一
-	bool InsertUnique(const T& data)
+	std::pair<iterator,bool>InsertUnique(const T& data)
 	{
+		CheckCapacity();
+
 		size_t bucketNo = HashFunc(data);
 		Node* pCur = table_[bucketNo];
 		
 		while (pCur)
 		{
-			if (pCur->data_ == data)
-			{
-				return false;
-			}
+			if (KOFV()(pCur->data_) == KOFV()(data))
+				return  make_pair(iterator(pCur, this), false);
+
 			pCur = pCur->pNext_;
 		}
 
@@ -121,16 +127,11 @@ public:
 		pCur->pNext_ = table_[bucketNo];
 		table_[bucketNo] = pCur;
 		++size_;
-		return  true;
+
+		return make_pair(iterator(pCur, this), true);
 	}
 
-	//哈希桶中可插入相同元素
-	bool InsertEqual(const T& data)
-	{
-
-	}
-
-	bool EraseUnique(const T& data)
+	size_t EraseUnique(const T& data)
 	{
 		size_t bucketNo = HashFunc(data);
 
@@ -138,7 +139,7 @@ public:
 		Node* pPre = nullptr;
 		while (pCur)
 		{
-			if (pCur->data_ ==data)
+			if (KOFV()(pCur->data_) ==KOFV()(data))
 			{
 				if (pPre == nullptr)
 				{
@@ -150,7 +151,7 @@ public:
 				}
 				delete pCur;
 				--size_;
-				return true;
+				return 1;
 			}
 			else
 			{
@@ -158,27 +159,21 @@ public:
 				pCur = pCur->pNext_;
 			}
 		}
-		return false;
-	}
-	//将所有值为data的结点删除
-	bool EraseEqual(const T& data)
-	{
-
+		return 0;
 	}
 
-	Node* Find(const T& data)const
+	iterator Find(const T& data)
 	{
 		size_t bucketNo = HashFunc(data);
 		Node* pCur = table_[bucketNo];
 		while (pCur)
 		{
-			if (pCur->data_ == data)
-			{
-				return pCur;
-			}
+			if (KOFV()(pCur->data_) == KOFV()(data))
+				return iterator(pCur, this);
+
 			pCur = pCur->pNext_;
 		}
-		return nullptr;
+		return end();
 	}
 
 	size_t size()const
@@ -191,84 +186,108 @@ public:
 		return size_ == 0;
 	}
 
-	Iterator begin()
+	iterator begin()
 	{
 		for (size_t bucketNo = 0; bucketNo < table_.capacity(); bucketNo++)
 		{
 			if (table_[bucketNo])
-				return Iterator(table_[bucketNo], this);
+				return iterator(table_[bucketNo], this);
 		}
 		return end();
 	}
 
-	Iterator end()
+	iterator end()
 	{
-		return Iterator(nullptr, this);
+		return iterator(nullptr, this);
 	}
 
-	//测试
-	void PrintHashBucket()
+	void clear()
 	{
 		for (size_t bucketNo = 0; bucketNo < table_.capacity(); bucketNo++)
 		{
-			Node* pCur = table_[bucketNo];
-			std::cout << "table_[" << bucketNo << "]:";
-			while (pCur)
+			Node* cur = table_[bucketNo];
+			while (cur)
 			{
-				std::cout << pCur->data_ << "----->";
-				pCur = pCur->pNext_;
+				table_[bucketNo] = cur->pNext_;
+				delete cur;
+				cur = table_[bucketNo];
 			}
-			std::cout << "NULL" << std::endl;
 		}
+		size_ = 0;
 	}
+
+	size_t bucket_count()const
+	{
+		return table_.capacity();
+	}
+
+	size_t bucket_size(size_t bucketNo)const
+	{
+		if (bucketNo >= bucket_count())
+		{
+			return 0;
+		}
+		size_t count = 0;
+		Node* cur = table_[bucketNo];
+		while (cur)
+		{
+			count++;
+			cur = cur->pNext_;
+		}
+		return count;
+	}
+
+	size_t bucket(const T& data)
+	{
+		return HashFunc(data);
+	}
+
+	void swap(HashBucket<T, KOFV, DF>& ht)
+	{
+		table_.swap(ht.table_);
+		std::swap(size_, ht.size_);
+	}
+
 private:
-	void CheckCapicaty()
+	void CheckCapacity()
 	{
 		if (size_ == table_.capacity())
 		{
+			HashBucket<T, KOFV, DF> newHT(GetNextPrime(size_));
+			for (size_t bucketNo = 0; bucketNo < table_.capacity(); bucketNo++)
+			{
+				Node* cur = table_[bucketNo];
+				while (cur)
+				{
+					size_t newBucketNo = newHT.HashFunc(cur->data_);
+					table_[bucketNo] = cur->pNext_;
+					cur->pNext_ = newHT.table_[newBucketNo];
+					newHT.table_[newBucketNo] = cur;
+					newHT.size_++;
+				
+					cur = table_[bucketNo];
+				}
+			}
+			this->swap(newHT);
 
+			//该方式效率太低
+			/*for (size_t bucketNo = 0; bucketNo < table_.capacity(); bucketNo++)
+			{
+				Node* cur = table_[bucketNo];
+				while (cur)
+				{
+					newHT.InsertUnique(cur->data_);
+					cur=cur->pNext_；
+				}
+			}
+			this->swap(newHT);*/
 		}
 	}
 	size_t HashFunc(const T& data)const
 	{
-		return DF()(data) % table_.capacity();
+		return DF()(KOFV()(data)) % table_.capacity();
 	}
 private:
 	std::vector<Node*> table_;
 	size_t size_;
 };
-
-void TestHashBucket()
-{
-	HashBucket<int> ht;
-	int array[] = { 4,1,5,7,6,9 };
-	for (auto e : array)
-	{
-		ht.InsertUnique(e);
-	}
-	std::cout << ht.size() << std::endl;
-	ht.PrintHashBucket();
-
-	ht.InsertUnique(44);
-	ht.InsertUnique(54);
-	auto it = ht.begin();
-	while (it != ht.end())
-	{
-		std::cout << *it << " ";
-		it++;
-	}
-	std::cout << std::endl;
-	ht.PrintHashBucket();
-
-	ht.EraseUnique(44);
-	if (ht.Find(44))
-	{
-		std::cout << "44 is in HashBucket" << std::endl;
-	}
-	else
-	{
-		std::cout << "54 is not in HashBucket" << std::endl;
-	}
-	std::cout << ht.size() << std::endl;
-	ht.PrintHashBucket();
-}
