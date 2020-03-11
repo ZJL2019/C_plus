@@ -1,7 +1,7 @@
 #include "LZ77.h"
 #include <iostream>
 
-const USH MIN_LOOKAHEAD = MAX_MATCH + MIN_MATCH + 1;
+const USH MIN_LOOKAHEAD = MAX_MATCH + 1;
 const USH MAX_DIST = WSIZE - MIN_LOOKAHEAD;
 
 
