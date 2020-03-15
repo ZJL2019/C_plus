@@ -1,7 +1,8 @@
-#include "BitSet.hpp"
-
+//#include "BitSet.hpp"
+#include "Bloomfilter.hpp"
 int main()
 {
-	TestBitSet();
+	//TestBitSet();
+	TestBloomFilter();
 	return 0;
 }
